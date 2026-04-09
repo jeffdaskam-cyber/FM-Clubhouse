@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer utilities {
+  .score-under { @apply text-red-600 font-semibold; }
+  .score-over  { @apply text-gray-700; }
+  .score-even  { @apply text-gray-900 font-medium; }
+}
