@@ -1,6 +1,6 @@
 import {
   collection, doc, getDoc, getDocs, addDoc, updateDoc,
-  query, where, writeBatch, serverTimestamp,
+  query, where, writeBatch, serverTimestamp, type DocumentData,
 } from 'firebase/firestore';
 import { db } from './config';
 import type { FantasyTeam } from '@/types/fantasy';
@@ -13,6 +13,7 @@ function fromDoc(data: Record<string, unknown>, id: string): FantasyTeam {
     leagueId: data.leagueId as string,
     tournamentId: data.tournamentId as string,
     name: data.name as string,
+    ownerUid: (data.ownerUid as string | null) ?? null,
     golferIds: data.golferIds as [string, string, string],
     computedTotalToPar: (data.computedTotalToPar as number) ?? 0,
     computedRank: (data.computedRank as number) ?? 0,
@@ -69,6 +70,23 @@ export async function saveTeamsBatch(
   });
   await batch.commit();
   return refs.map(r => r.id);
+}
+
+export async function updateTeam(
+  id: string,
+  updates: { name?: string; golferIds?: [string, string, string] },
+): Promise<void> {
+  await updateDoc(doc(db, COL, id), {
+    ...(updates as DocumentData),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function claimTeam(id: string, ownerUid: string): Promise<void> {
+  await updateDoc(doc(db, COL, id), {
+    ownerUid,
+    updatedAt: serverTimestamp(),
+  });
 }
 
 export async function updateTeamScores(

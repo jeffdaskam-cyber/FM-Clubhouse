@@ -9,6 +9,7 @@ import { Select } from '@/components/ui/Select';
 import { Input } from '@/components/ui/Input';
 import { Spinner } from '@/components/ui/Spinner';
 import { PageWrapper } from '@/components/layout/PageWrapper';
+import { EditTeamsCard } from '@/components/settings/EditTeamsCard';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
 import { Link } from 'react-router-dom';
@@ -18,8 +19,8 @@ import type { TournamentSlug, TournamentStatus } from '@/types/tournament';
 
 // Known venue data for fixed-location majors
 const VENUE_PRESETS: Partial<Record<TournamentSlug, { venue: string; location: string; lat: number; lon: number; par: number }>> = {
-  players: { venue: 'TPC Sawgrass',            location: 'Ponte Vedra Beach, FL', lat: 30.1975,  lon: -81.3962, par: 72 },
-  masters: { venue: 'Augusta National Golf Club', location: 'Augusta, GA',          lat: 33.5022,  lon: -82.0200, par: 72 },
+  players: { venue: 'TPC Sawgrass',               location: 'Ponte Vedra Beach, FL', lat: 30.1975, lon: -81.3962, par: 72 },
+  masters: { venue: 'Augusta National Golf Club',  location: 'Augusta, GA',           lat: 33.5022, lon: -82.0200, par: 72 },
 };
 
 interface TournamentFormState {
@@ -56,7 +57,6 @@ function CreateTournamentCard({ onCreated }: { onCreated: () => void }) {
 
   function handleSlugChange(slug: TournamentSlug | '') {
     const preset = slug ? VENUE_PRESETS[slug] : undefined;
-    const name = SUPPORTED_TOURNAMENTS.find(t => t.slug === slug)?.name ?? '';
     setForm(f => ({
       ...f,
       slug,
@@ -66,8 +66,6 @@ function CreateTournamentCard({ onCreated }: { onCreated: () => void }) {
       lon:      preset ? String(preset.lon) : f.lon,
       par:      preset ? String(preset.par) : f.par,
     }));
-    // Suppress unused name variable lint — name is implicit in slug selection
-    void name;
     setError('');
     setSuccess('');
   }
@@ -87,9 +85,7 @@ function CreateTournamentCard({ onCreated }: { onCreated: () => void }) {
     setError('');
     try {
       await saveTournament({
-        id,
-        name,
-        year,
+        id, name, year,
         slug:                form.slug as TournamentSlug,
         startDate:           new Date(form.startDate).toISOString(),
         endDate:             new Date(form.endDate).toISOString(),
@@ -99,7 +95,7 @@ function CreateTournamentCard({ onCreated }: { onCreated: () => void }) {
         lat:                 parseFloat(form.lat) || 0,
         lon:                 parseFloat(form.lon) || 0,
         par:                 parseInt(form.par, 10) || 72,
-        scoringProvider:     'sportradar', // unused — scoring comes from Google Sheet
+        scoringProvider:     'sportradar',
         providerTournamentId: '',
         isLocked:            false,
       });
@@ -116,7 +112,7 @@ function CreateTournamentCard({ onCreated }: { onCreated: () => void }) {
 
   return (
     <Card>
-      <h2 className="font-semibold text-gray-700 mb-4">Create Tournament</h2>
+      <h2 className="font-semibold text-neutral-700 mb-4">Create Tournament</h2>
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <Select
@@ -124,7 +120,7 @@ function CreateTournamentCard({ onCreated }: { onCreated: () => void }) {
             value={form.slug}
             onChange={e => handleSlugChange(e.target.value as TournamentSlug | '')}
           >
-            <option value="">Select...</option>
+            <option value="">Select…</option>
             {SUPPORTED_TOURNAMENTS.map(t => (
               <option key={t.slug} value={t.slug}>{t.name}</option>
             ))}
@@ -163,11 +159,11 @@ function CreateTournamentCard({ onCreated }: { onCreated: () => void }) {
         </div>
 
         {error   && <p className="text-sm text-red-600">{error}</p>}
-        {success && <p className="text-sm text-golf-green font-medium">{success}</p>}
+        {success && <p className="text-sm text-green-600 font-medium">{success}</p>}
 
         <div className="flex justify-end pt-1">
           <Button onClick={handleCreate} disabled={saving}>
-            {saving ? 'Creating...' : 'Create Tournament'}
+            {saving ? 'Creating…' : 'Create Tournament'}
           </Button>
         </div>
       </div>
@@ -216,8 +212,8 @@ export function Settings() {
     return (
       <PageWrapper>
         <div className="text-center py-16">
-          <p className="text-gray-500 mb-3">Admin access required.</p>
-          <Link to="/login" className="text-golf-green underline text-sm">Sign in</Link>
+          <p className="text-neutral-500 mb-3">Admin access required.</p>
+          <Link to="/login" className="text-green-600 underline text-sm">Sign in</Link>
         </div>
       </PageWrapper>
     );
@@ -225,7 +221,7 @@ export function Settings() {
 
   return (
     <PageWrapper>
-      <h1 className="text-xl font-bold text-gray-900 mb-6">Settings</h1>
+      <h1 className="text-xl font-bold text-neutral-900 mb-6">Settings</h1>
 
       <div className="space-y-4">
         <CreateTournamentCard
@@ -233,7 +229,7 @@ export function Settings() {
         />
 
         <Card>
-          <h2 className="font-semibold text-gray-700 mb-3">Manage Tournament</h2>
+          <h2 className="font-semibold text-neutral-700 mb-3">Manage Tournament</h2>
           {isLoading ? <Spinner /> : (
             <div className="space-y-4">
               <Select
@@ -241,7 +237,7 @@ export function Settings() {
                 value={selectedTournamentId}
                 onChange={e => { setSelectedTournamentId(e.target.value); setMessage(''); }}
               >
-                <option value="">Choose tournament...</option>
+                <option value="">Choose tournament…</option>
                 {tournaments.map(t => (
                   <option key={t.id} value={t.id}>{t.name} {t.year}</option>
                 ))}
@@ -249,7 +245,7 @@ export function Settings() {
 
               {selectedTournament && (
                 <div className="space-y-3 pt-2">
-                  <div className="text-sm text-gray-600 space-y-1">
+                  <div className="text-sm text-neutral-600 space-y-1">
                     <p><span className="font-medium">Status:</span> {selectedTournament.status}</p>
                     <p><span className="font-medium">Dates:</span> {formatDate(selectedTournament.startDate)} – {formatDate(selectedTournament.endDate)}</p>
                     <p><span className="font-medium">Venue:</span> {selectedTournament.venue}</p>
@@ -262,18 +258,22 @@ export function Settings() {
                     onClick={handleToggleLock}
                     disabled={working}
                   >
-                    {working ? 'Working...' : selectedTournament.isLocked ? 'Unlock Draft' : 'Lock Draft'}
+                    {working ? 'Working…' : selectedTournament.isLocked ? 'Unlock Draft' : 'Lock Draft'}
                   </Button>
-                  {message && <p className="text-sm text-golf-green">{message}</p>}
+                  {message && <p className="text-sm text-green-600">{message}</p>}
                 </div>
               )}
             </div>
           )}
         </Card>
 
+        {selectedTournamentId && (
+          <EditTeamsCard tournamentId={selectedTournamentId} />
+        )}
+
         <Card>
-          <h2 className="font-semibold text-gray-700 mb-3">Account</h2>
-          <p className="text-sm text-gray-600 mb-3">Signed in as {user?.email}</p>
+          <h2 className="font-semibold text-neutral-700 mb-3">Account</h2>
+          <p className="text-sm text-neutral-600 mb-3">Signed in as {user?.email}</p>
           <Button variant="ghost" size="sm" onClick={() => signOut(auth)}>
             Sign out
           </Button>

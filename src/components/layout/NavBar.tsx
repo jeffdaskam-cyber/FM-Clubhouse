@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export function NavBar() {
   const [open, setOpen] = useState(false);
-  const { isAdmin, user, loading } = useAuth();
+  const { isAdmin, isUser, user, loading } = useAuth();
 
   const navLinks = [
     { to: '/', label: 'Scoreboard' },
@@ -21,6 +21,10 @@ export function NavBar() {
   const linkClass = (isActive: boolean) =>
     cn('text-sm font-medium transition-colors hover:text-gold-400',
       isActive ? 'text-gold-400' : 'text-green-100');
+
+  const signOutLabel = isAdmin
+    ? `Sign out (${user?.email?.split('@')[0]})`
+    : 'Sign out';
 
   return (
     <nav className="bg-green-800 text-white shadow-md sticky top-0 z-50">
@@ -40,19 +44,16 @@ export function NavBar() {
             </NavLink>
           ))}
 
-          {/* Auth control */}
           {!loading && (
-            isAdmin
+            (isAdmin || isUser)
               ? <button
                   onClick={() => signOut(auth)}
                   className="text-sm font-medium text-green-100 hover:text-gold-400 transition-colors"
                 >
-                  Sign out ({user?.email?.split('@')[0]})
+                  {signOutLabel}
                 </button>
-              : <NavLink to="/login"
-                  className={({ isActive }) => linkClass(isActive)}
-                >
-                  Admin sign in
+              : <NavLink to="/login" className={({ isActive }) => linkClass(isActive)}>
+                  Sign in
                 </NavLink>
           )}
         </div>
@@ -85,14 +86,13 @@ export function NavBar() {
             </NavLink>
           ))}
 
-          {/* Auth control */}
           {!loading && (
-            isAdmin
+            (isAdmin || isUser)
               ? <button
                   onClick={() => { signOut(auth); setOpen(false); }}
                   className="block w-full text-left px-4 py-3 text-sm font-medium text-green-100 hover:bg-green-800 transition-colors"
                 >
-                  Sign out ({user?.email?.split('@')[0]})
+                  {signOutLabel}
                 </button>
               : <NavLink
                   to="/login"
@@ -102,7 +102,7 @@ export function NavBar() {
                       isActive ? 'text-gold-400 bg-green-800' : 'text-green-100')
                   }
                 >
-                  Admin sign in
+                  Sign in
                 </NavLink>
           )}
         </div>

@@ -71,6 +71,7 @@ export function DraftForm({ tournament, isLocked }: DraftFormProps) {
         leagueId,
         tournamentId: tournament.id,
         name: t.name,
+        ownerUid: null,
         golferIds: t.golferIds as [string, string, string],
         frozenGolferIds: [],
         frozenScores: {},

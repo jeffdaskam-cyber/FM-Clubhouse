@@ -3,12 +3,21 @@ export interface FantasyTeam {
   leagueId: string;
   tournamentId: string;
   name: string;
+  ownerUid: string | null;
   golferIds: [string, string, string];
   computedTotalToPar: number;
   computedRank: number;
   frozenGolferIds: string[];
   frozenScores: Record<string, number>;
   updatedAt: string; // ISO string
+}
+
+export interface UserProfile {
+  uid: string;
+  email: string;
+  teamId: string;
+  tournamentId: string;
+  createdAt: string; // ISO string
 }
 
 export interface FantasyLeague {
