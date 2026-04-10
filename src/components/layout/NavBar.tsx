@@ -1,11 +1,13 @@
 import { Link, NavLink } from 'react-router-dom';
 import { useState } from 'react';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase/config';
 import { cn } from '@/utils/cn';
 import { useAuth } from '@/hooks/useAuth';
 
 export function NavBar() {
   const [open, setOpen] = useState(false);
-  const { isAdmin } = useAuth();
+  const { isAdmin, user, loading } = useAuth();
 
   const navLinks = [
     { to: '/', label: 'Scoreboard' },
@@ -15,6 +17,10 @@ export function NavBar() {
       { to: '/settings', label: 'Settings' },
     ] : []),
   ];
+
+  const linkClass = (isActive: boolean) =>
+    cn('text-sm font-medium transition-colors hover:text-flag-yellow',
+      isActive ? 'text-flag-yellow' : 'text-green-100');
 
   return (
     <nav className="bg-fairway text-white shadow-md sticky top-0 z-50">
@@ -26,18 +32,28 @@ export function NavBar() {
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-6">
           {navLinks.map(({ to, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === '/'}
-              className={({ isActive }) =>
-                cn('text-sm font-medium transition-colors hover:text-flag-yellow',
-                  isActive ? 'text-flag-yellow' : 'text-green-100')
-              }
+            <NavLink key={to} to={to} end={to === '/'}
+              className={({ isActive }) => linkClass(isActive)}
             >
               {label}
             </NavLink>
           ))}
+
+          {/* Auth control */}
+          {!loading && (
+            isAdmin
+              ? <button
+                  onClick={() => signOut(auth)}
+                  className="text-sm font-medium text-green-100 hover:text-flag-yellow transition-colors"
+                >
+                  Sign out ({user?.email?.split('@')[0]})
+                </button>
+              : <NavLink to="/login"
+                  className={({ isActive }) => linkClass(isActive)}
+                >
+                  Admin sign in
+                </NavLink>
+          )}
         </div>
 
         {/* Mobile hamburger */}
@@ -57,9 +73,7 @@ export function NavBar() {
         <div className="md:hidden bg-golf-green border-t border-green-700">
           {navLinks.map(({ to, label }) => (
             <NavLink
-              key={to}
-              to={to}
-              end={to === '/'}
+              key={to} to={to} end={to === '/'}
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
                 cn('block px-4 py-3 text-sm font-medium transition-colors hover:bg-fairway',
@@ -69,6 +83,27 @@ export function NavBar() {
               {label}
             </NavLink>
           ))}
+
+          {/* Auth control */}
+          {!loading && (
+            isAdmin
+              ? <button
+                  onClick={() => { signOut(auth); setOpen(false); }}
+                  className="block w-full text-left px-4 py-3 text-sm font-medium text-green-100 hover:bg-fairway transition-colors"
+                >
+                  Sign out ({user?.email?.split('@')[0]})
+                </button>
+              : <NavLink
+                  to="/login"
+                  onClick={() => setOpen(false)}
+                  className={({ isActive }) =>
+                    cn('block px-4 py-3 text-sm font-medium transition-colors hover:bg-fairway',
+                      isActive ? 'text-flag-yellow bg-fairway' : 'text-green-100')
+                  }
+                >
+                  Admin sign in
+                </NavLink>
+          )}
         </div>
       )}
     </nav>
