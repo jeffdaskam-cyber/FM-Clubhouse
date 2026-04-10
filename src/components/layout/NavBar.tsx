@@ -25,7 +25,8 @@ export function NavBar() {
   return (
     <nav className="bg-green-800 text-white shadow-md sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link to="/" className="font-bold text-lg tracking-tight text-gold-400">
+        <Link to="/" className="flex items-center gap-2.5 font-bold text-lg tracking-tight text-gold-400">
+          <img src="/icons/Logo_192.png" alt="" className="w-8 h-8 rounded-sm object-contain shrink-0" />
           FM Clubhouse
         </Link>
 
