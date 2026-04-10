@@ -11,10 +11,10 @@ export function ScoreboardHeader({ tournament, lastUpdated }: ScoreboardHeaderPr
   if (!tournament) return null;
 
   return (
-    <div className="bg-fairway text-white rounded-xl p-4 mb-6">
+    <div className="bg-green-800 text-white rounded-xl p-4 mb-6">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
         <div>
-          <h1 className="text-lg font-bold text-flag-yellow">{tournament.name}</h1>
+          <h1 className="text-lg font-bold text-gold-400">{tournament.name}</h1>
           <p className="text-sm text-green-200">{tournament.venue} &bull; {tournament.location}</p>
           <p className="text-xs text-green-300 mt-0.5">
             {formatDate(tournament.startDate)} &ndash; {formatDate(tournament.endDate)}

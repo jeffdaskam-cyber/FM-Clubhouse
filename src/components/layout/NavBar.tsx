@@ -19,13 +19,13 @@ export function NavBar() {
   ];
 
   const linkClass = (isActive: boolean) =>
-    cn('text-sm font-medium transition-colors hover:text-flag-yellow',
-      isActive ? 'text-flag-yellow' : 'text-green-100');
+    cn('text-sm font-medium transition-colors hover:text-gold-400',
+      isActive ? 'text-gold-400' : 'text-green-100');
 
   return (
-    <nav className="bg-fairway text-white shadow-md sticky top-0 z-50">
+    <nav className="bg-green-800 text-white shadow-md sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link to="/" className="font-bold text-lg tracking-tight text-flag-yellow">
+        <Link to="/" className="font-bold text-lg tracking-tight text-gold-400">
           FM Clubhouse
         </Link>
 
@@ -44,7 +44,7 @@ export function NavBar() {
             isAdmin
               ? <button
                   onClick={() => signOut(auth)}
-                  className="text-sm font-medium text-green-100 hover:text-flag-yellow transition-colors"
+                  className="text-sm font-medium text-green-100 hover:text-gold-400 transition-colors"
                 >
                   Sign out ({user?.email?.split('@')[0]})
                 </button>
@@ -58,7 +58,7 @@ export function NavBar() {
 
         {/* Mobile hamburger */}
         <button
-          className="md:hidden p-2 rounded-md hover:bg-golf-green transition-colors"
+          className="md:hidden p-2 rounded-md hover:bg-green-700 transition-colors"
           onClick={() => setOpen(v => !v)}
           aria-label="Toggle menu"
         >
@@ -70,14 +70,14 @@ export function NavBar() {
 
       {/* Mobile menu */}
       {open && (
-        <div className="md:hidden bg-golf-green border-t border-green-700">
+        <div className="md:hidden bg-green-700 border-t border-green-900">
           {navLinks.map(({ to, label }) => (
             <NavLink
               key={to} to={to} end={to === '/'}
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
-                cn('block px-4 py-3 text-sm font-medium transition-colors hover:bg-fairway',
-                  isActive ? 'text-flag-yellow bg-fairway' : 'text-green-100')
+                cn('block px-4 py-3 text-sm font-medium transition-colors hover:bg-green-800',
+                  isActive ? 'text-gold-400 bg-green-800' : 'text-green-100')
               }
             >
               {label}
@@ -89,7 +89,7 @@ export function NavBar() {
             isAdmin
               ? <button
                   onClick={() => { signOut(auth); setOpen(false); }}
-                  className="block w-full text-left px-4 py-3 text-sm font-medium text-green-100 hover:bg-fairway transition-colors"
+                  className="block w-full text-left px-4 py-3 text-sm font-medium text-green-100 hover:bg-green-800 transition-colors"
                 >
                   Sign out ({user?.email?.split('@')[0]})
                 </button>
@@ -97,8 +97,8 @@ export function NavBar() {
                   to="/login"
                   onClick={() => setOpen(false)}
                   className={({ isActive }) =>
-                    cn('block px-4 py-3 text-sm font-medium transition-colors hover:bg-fairway',
-                      isActive ? 'text-flag-yellow bg-fairway' : 'text-green-100')
+                    cn('block px-4 py-3 text-sm font-medium transition-colors hover:bg-green-800',
+                      isActive ? 'text-gold-400 bg-green-800' : 'text-green-100')
                   }
                 >
                   Admin sign in

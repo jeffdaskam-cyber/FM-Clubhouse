@@ -7,12 +7,14 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-neutral-100 text-neutral-900 font-sans;
   }
 }
 
 @layer utilities {
-  .score-under { @apply text-red-600 font-semibold; }
-  .score-over  { @apply text-gray-700; }
-  .score-even  { @apply text-gray-900 font-medium; }
+  .score-under { color: #E63946; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .score-over  { color: #212529; font-family: 'JetBrains Mono', monospace; }
+  .score-even  { color: #2D6A4F; font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+  .font-score  { font-family: 'JetBrains Mono', monospace; }
+  .font-pos    { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; }
 }

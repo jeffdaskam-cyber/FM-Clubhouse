@@ -43,13 +43,17 @@ export function GolferSearch({
 
   return (
     <div className="relative" ref={ref}>
-      {label && <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>}
+      {label && (
+        <label className="block text-xs font-medium text-neutral-600 uppercase tracking-wide mb-1">
+          {label}
+        </label>
+      )}
       <button
         type="button"
         className={cn(
           'w-full flex items-center justify-between px-3 py-2 rounded-lg border text-sm text-left',
-          'bg-white focus:outline-none focus:ring-2 focus:ring-golf-green',
-          selected ? 'border-golf-green text-gray-900' : 'border-gray-300 text-gray-400',
+          'bg-white focus:outline-none focus:ring-2 focus:ring-green-400 transition-colors',
+          selected ? 'border-green-400 text-neutral-900' : 'border-neutral-300 text-neutral-400',
         )}
         onClick={() => setOpen(v => !v)}
       >
@@ -58,7 +62,7 @@ export function GolferSearch({
           <span
             role="button"
             onClick={e => { e.stopPropagation(); onChange(null); setQuery(''); }}
-            className="text-gray-400 hover:text-gray-700 ml-1 shrink-0"
+            className="text-neutral-400 hover:text-neutral-700 ml-1 shrink-0"
           >
             ✕
           </span>
@@ -66,12 +70,12 @@ export function GolferSearch({
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
-          <div className="p-2 border-b border-gray-100">
+        <div className="absolute z-50 mt-1 w-full bg-white border border-neutral-200 rounded-lg shadow-lg overflow-hidden">
+          <div className="p-2 border-b border-neutral-100">
             <input
               autoFocus
               type="text"
-              className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-golf-green"
+              className="w-full px-2 py-1.5 text-sm border border-neutral-200 rounded focus:outline-none focus:ring-1 focus:ring-green-400"
               placeholder="Type to search..."
               value={query}
               onChange={e => setQuery(e.target.value)}
@@ -79,7 +83,7 @@ export function GolferSearch({
           </div>
           <ul className="max-h-52 overflow-y-auto">
             {filtered.length === 0 && (
-              <li className="px-3 py-2 text-sm text-gray-400">No players found</li>
+              <li className="px-3 py-2 text-sm text-neutral-400">No players found</li>
             )}
             {filtered.map(p => {
               const disabled = disabledPlayerIds.includes(p.id) && p.id !== value;
@@ -91,9 +95,9 @@ export function GolferSearch({
                     className={cn(
                       'w-full text-left px-3 py-2 text-sm transition-colors',
                       disabled
-                        ? 'text-gray-300 cursor-not-allowed'
-                        : 'hover:bg-green-50 text-gray-800',
-                      value === p.id && 'bg-green-50 font-medium',
+                        ? 'text-neutral-300 cursor-not-allowed'
+                        : 'hover:bg-green-50 text-neutral-800',
+                      value === p.id && 'bg-green-50 font-medium text-green-700',
                     )}
                     onClick={() => {
                       onChange(p.id);
@@ -103,7 +107,7 @@ export function GolferSearch({
                   >
                     <span className="font-medium">{p.name}</span>
                     {p.position && p.position !== '-' && (
-                      <span className="text-gray-400 ml-2 text-xs">{p.position}</span>
+                      <span className="font-pos text-neutral-400 ml-2 text-xs">{p.position}</span>
                     )}
                   </button>
                 </li>

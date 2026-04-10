@@ -9,7 +9,7 @@ interface LeaderboardTableProps {
 
 export function LeaderboardTable({ players, highlightedPlayerIds }: LeaderboardTableProps) {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-card border border-neutral-200 overflow-hidden">
       <LeaderboardHeader />
       {players.map(player => (
         <LeaderboardRow

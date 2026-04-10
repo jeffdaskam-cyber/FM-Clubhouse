@@ -9,7 +9,7 @@ export function Card({ className, children, noPad, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        'bg-white rounded-xl shadow-sm border border-gray-100',
+        'bg-white rounded-xl shadow-card border border-neutral-200',
         !noPad && 'p-4',
         className,
       )}

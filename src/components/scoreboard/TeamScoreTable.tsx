@@ -7,7 +7,7 @@ interface TeamScoreTableProps {
 
 export function TeamScoreTable({ team }: TeamScoreTableProps) {
   return (
-    <div className="divide-y divide-gray-50">
+    <div className="divide-y divide-neutral-100">
       {team.golfers.map(player => (
         <GolferRow key={player.id} player={player} />
       ))}

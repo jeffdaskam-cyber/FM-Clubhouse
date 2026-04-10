@@ -16,16 +16,16 @@ export function Button({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center font-medium rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-golf-green disabled:opacity-50 disabled:pointer-events-none',
+        'inline-flex items-center justify-center font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none',
         {
-          'bg-golf-green text-white hover:bg-fairway': variant === 'primary',
-          'bg-white text-golf-green border border-golf-green hover:bg-green-50': variant === 'secondary',
-          'text-gray-700 hover:bg-gray-100': variant === 'ghost',
-          'bg-red-600 text-white hover:bg-red-700': variant === 'danger',
+          'bg-green-500 text-white hover:bg-green-600 shadow-sm':                              variant === 'primary',
+          'bg-white text-green-500 border border-green-400 hover:bg-green-50 shadow-sm':        variant === 'secondary',
+          'text-neutral-600 hover:bg-neutral-100':                                              variant === 'ghost',
+          'bg-red-600 text-white hover:bg-red-700 shadow-sm':                                   variant === 'danger',
         },
         {
-          'text-sm px-3 py-1.5': size === 'sm',
-          'text-sm px-4 py-2': size === 'md',
+          'text-xs px-3 py-1.5': size === 'sm',
+          'text-sm px-4 py-2':   size === 'md',
           'text-base px-6 py-3': size === 'lg',
         },
         className,

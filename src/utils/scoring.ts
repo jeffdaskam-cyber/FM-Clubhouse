@@ -15,6 +15,14 @@ export function scoreClass(score: number): string {
   return 'score-even';
 }
 
+/** Returns Tailwind bg + text classes for a rank position badge */
+export function rankBadgeClass(rank: number): string {
+  if (rank === 1) return 'bg-gold-300 text-neutral-900';
+  if (rank === 2) return 'bg-neutral-300 text-neutral-800';
+  if (rank === 3) return 'bg-gold-700 text-white';
+  return 'bg-neutral-100 text-neutral-600';
+}
+
 export function weatherCodeToDescription(code: number): string {
   if (code === 0) return 'Clear';
   if (code <= 3) return 'Partly Cloudy';
