@@ -8,7 +8,8 @@ export async function fetchWeather(lat: number, lon: number): Promise<WeatherDat
     latitude: String(lat),
     longitude: String(lon),
     current: 'temperature_2m,wind_speed_10m,wind_direction_10m,weather_code',
-    wind_speed_unit: 'kmh',
+    temperature_unit: 'fahrenheit',
+    wind_speed_unit: 'mph',
     forecast_days: '1',
   });
   const res = await fetch(`${BASE}?${params}`);

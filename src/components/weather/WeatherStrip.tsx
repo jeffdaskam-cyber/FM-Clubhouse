@@ -14,9 +14,9 @@ export function WeatherStrip({ lat, lon }: WeatherStripProps) {
   return (
     <div className="flex items-center gap-3 text-xs text-green-100 bg-green-900/40 rounded-lg px-3 py-1.5">
       <span>{data.description}</span>
-      <span>{Math.round(data.temperature)}°C</span>
+      <span>{Math.round(data.temperature)}°F</span>
       <span>
-        {Math.round(data.windSpeed)} km/h {windDirectionLabel(data.windDirection)}
+        {Math.round(data.windSpeed)} mph {windDirectionLabel(data.windDirection)}
       </span>
     </div>
   );
