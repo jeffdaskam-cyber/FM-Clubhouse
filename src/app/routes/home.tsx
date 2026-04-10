@@ -42,7 +42,8 @@ export function Home() {
       )
     : [];
 
-  const isLoading = loadingTournaments || loadingLive || loadingLeague;
+  // Only block on live/league loading once a tournament is actually selected
+  const isLoading = loadingTournaments || (!!selectedTournamentId && (loadingLive || loadingLeague));
 
   return (
     <PageWrapper>
@@ -71,11 +72,18 @@ export function Home() {
         </div>
       )}
 
+      {!loadingTournaments && tournaments.length === 0 && (
+        <EmptyState
+          title="No tournaments yet"
+          description="Sign in as admin and go to Settings → Create Tournament to get started."
+        />
+      )}
+
       {!isLoading && liveError && (
         <ErrorState message="Failed to load live scores." onRetry={refresh} />
       )}
 
-      {!isLoading && !liveError && standings.length === 0 && (
+      {!isLoading && !liveError && selectedTournamentId && standings.length === 0 && (
         <EmptyState
           title="No fantasy teams yet"
           description="An admin can create teams on the Draft page."

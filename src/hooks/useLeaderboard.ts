@@ -57,7 +57,11 @@ export function useLeaderboard(tournamentId: string): UseLeaderboardResult {
   }, [tournamentId, loadFromCache]);
 
   useEffect(() => {
-    if (!tournamentId) return;
+    if (!tournamentId) {
+      setLoading(false);
+      setPlayers([]);
+      return;
+    }
 
     let cancelled = false;
 
