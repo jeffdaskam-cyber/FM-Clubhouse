@@ -1,18 +1,17 @@
 import { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import type { FieldPlayer } from '@/types/scoring';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { TeamDraft } from '@/types/fantasy';
 import type { Tournament } from '@/types/tournament';
+import { fetchLeaderboard } from '@/lib/scoring';
 import { TeamEntryRow } from './TeamEntryRow';
 import { Button } from '@/components/ui/Button';
+import { Spinner } from '@/components/ui/Spinner';
 import { createLeague } from '@/lib/firebase/leagues';
 import { saveTeamsBatch } from '@/lib/firebase/teams';
 import { MIN_TEAMS, MAX_TEAMS, GOLFERS_PER_TEAM } from '@/utils/constants';
 
 interface DraftFormProps {
   tournament: Tournament;
-  players: FieldPlayer[];
-  existingLeagueId?: string;
   isLocked?: boolean;
 }
 
@@ -20,13 +19,20 @@ function emptyTeam(): TeamDraft {
   return { name: '', golferIds: Array(GOLFERS_PER_TEAM).fill(null) };
 }
 
-export function DraftForm({ tournament, players, isLocked }: DraftFormProps) {
+export function DraftForm({ tournament, isLocked }: DraftFormProps) {
   const [teams, setTeams] = useState<TeamDraft[]>([emptyTeam(), emptyTeam(), emptyTeam(), emptyTeam()]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [errors, setErrors] = useState<Record<number, Record<string, string>>>({});
   const [globalError, setGlobalError] = useState('');
   const queryClient = useQueryClient();
+
+  // Source players from the live Google Sheet so IDs are slugified names
+  const { data: players = [], isLoading: loadingPlayers } = useQuery({
+    queryKey: ['leaderboard-field'],
+    queryFn: fetchLeaderboard,
+    staleTime: 5 * 60 * 1000,
+  });
 
   const allSelectedIds = teams.flatMap(t =>
     t.golferIds.filter((id): id is string => id !== null)
@@ -96,6 +102,14 @@ export function DraftForm({ tournament, players, isLocked }: DraftFormProps) {
         <Button className="mt-4" onClick={() => { setSaved(false); setTeams([emptyTeam(), emptyTeam(), emptyTeam(), emptyTeam()]); }}>
           Create another league
         </Button>
+      </div>
+    );
+  }
+
+  if (loadingPlayers) {
+    return (
+      <div className="flex justify-center py-8">
+        <Spinner className="text-golf-green" />
       </div>
     );
   }

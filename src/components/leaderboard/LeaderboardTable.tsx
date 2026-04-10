@@ -1,9 +1,9 @@
-import type { NormalizedPlayer } from '@/types/scoring';
+import type { PlayerScore } from '@/lib/scoring';
 import { LeaderboardHeader } from './LeaderboardHeader';
 import { LeaderboardRow } from './LeaderboardRow';
 
 interface LeaderboardTableProps {
-  players: NormalizedPlayer[];
+  players: PlayerScore[];
   highlightedPlayerIds?: Set<string>;
 }
 
@@ -13,9 +13,9 @@ export function LeaderboardTable({ players, highlightedPlayerIds }: LeaderboardT
       <LeaderboardHeader />
       {players.map(player => (
         <LeaderboardRow
-          key={player.playerId}
+          key={player.id}
           player={player}
-          isHighlighted={highlightedPlayerIds?.has(player.playerId)}
+          isHighlighted={highlightedPlayerIds?.has(player.id)}
         />
       ))}
     </div>

@@ -1,4 +1,4 @@
-import type { FieldPlayer } from '@/types/scoring';
+import type { PlayerScore } from '@/lib/scoring';
 import type { TeamDraft } from '@/types/fantasy';
 import { GolferSearch } from './GolferSearch';
 import { Input } from '@/components/ui/Input';
@@ -8,7 +8,7 @@ import { GOLFERS_PER_TEAM } from '@/utils/constants';
 interface TeamEntryRowProps {
   index: number;
   team: TeamDraft;
-  players: FieldPlayer[];
+  players: PlayerScore[];
   disabledPlayerIds: string[];
   onChange: (team: TeamDraft) => void;
   onRemove: () => void;

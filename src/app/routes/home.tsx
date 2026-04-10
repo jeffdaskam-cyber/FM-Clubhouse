@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { listTournaments } from '@/lib/firebase/tournaments';
-import { useLiveTournament } from '@/features/tournament/useLiveTournament';
+import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useFantasyLeague } from '@/features/fantasy/useFantasyLeague';
-import { useTeamRankings } from '@/features/fantasy/useTeamRankings';
+import { buildFantasyStandings } from '@/lib/scoring/fantasyEngine';
 import { ScoreboardHeader } from '@/components/scoreboard/ScoreboardHeader';
 import { TeamCard } from '@/components/scoreboard/TeamCard';
 import { Spinner } from '@/components/ui/Spinner';
@@ -24,17 +24,23 @@ export function Home() {
   useEffect(() => {
     if (!selectedTournamentId && tournaments.length > 0) {
       const active = tournaments.find(t => t.status === 'active');
-      if (active) setSelectedTournamentId(active.id);
-      else setSelectedTournamentId(tournaments[0].id);
+      setSelectedTournamentId(active ? active.id : tournaments[0].id);
     }
   }, [tournaments, selectedTournamentId]);
 
   const activeTournament = tournaments.find(t => t.id === selectedTournamentId) ?? null;
 
-  const { data: liveData, isLoading: loadingLive, isError: liveError, refetch } = useLiveTournament(activeTournament);
+  const { players, loading: loadingLive, error: liveError, lastUpdated, refresh } =
+    useLeaderboard(selectedTournamentId);
+
   const { data: leagueData, isLoading: loadingLeague } = useFantasyLeague(activeTournament?.id ?? null);
 
-  const rankedTeams = useTeamRankings(leagueData?.teams, liveData?.players);
+  const standings = leagueData
+    ? buildFantasyStandings(
+        leagueData.teams.map(t => ({ teamId: t.id, teamName: t.name, golferIds: t.golferIds })),
+        players,
+      )
+    : [];
 
   const isLoading = loadingTournaments || loadingLive || loadingLeague;
 
@@ -56,7 +62,7 @@ export function Home() {
 
       <ScoreboardHeader
         tournament={activeTournament}
-        lastUpdated={liveData?.fetchedAt}
+        lastUpdated={lastUpdated?.toISOString()}
       />
 
       {isLoading && (
@@ -66,30 +72,23 @@ export function Home() {
       )}
 
       {!isLoading && liveError && (
-        <ErrorState
-          message="Failed to load live scores."
-          onRetry={() => refetch()}
-        />
+        <ErrorState message="Failed to load live scores." onRetry={refresh} />
       )}
 
-      {!isLoading && !liveError && rankedTeams.length === 0 && (
+      {!isLoading && !liveError && standings.length === 0 && (
         <EmptyState
           title="No fantasy teams yet"
           description="An admin can create teams on the Draft page."
         />
       )}
 
-      {!isLoading && rankedTeams.length > 0 && (
+      {!isLoading && standings.length > 0 && (
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
             Fantasy Standings
           </h2>
-          {rankedTeams.map(team => (
-            <TeamCard
-              key={team.id}
-              team={team}
-              players={liveData?.players ?? []}
-            />
+          {standings.map(team => (
+            <TeamCard key={team.teamId} team={team} />
           ))}
         </div>
       )}

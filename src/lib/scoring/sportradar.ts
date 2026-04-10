@@ -1,5 +1,10 @@
-import type { ScoringProvider } from './types';
 import type { FieldPlayer, NormalizedPlayer } from '@/types/scoring';
+
+interface ScoringProvider {
+  readonly name: string;
+  fetchLeaderboard(id: string): Promise<NormalizedPlayer[]>;
+  fetchField(id: string): Promise<FieldPlayer[]>;
+}
 import { parsePosition, parseToPar, mapStatus, parseThru, parseRoundScore } from './normalize';
 
 // Sportradar Golf API v3 adapter

@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import type { FieldPlayer } from '@/types/scoring';
+import type { PlayerScore } from '@/lib/scoring';
 import { cn } from '@/utils/cn';
 
 interface GolferSearchProps {
-  players: FieldPlayer[];
+  players: PlayerScore[];
   value: string | null;
   onChange: (playerId: string | null) => void;
   disabledPlayerIds: string[];
@@ -23,12 +23,12 @@ export function GolferSearch({
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const selected = players.find(p => p.playerId === value);
+  const selected = players.find(p => p.id === value);
 
   const filtered = query.trim() === ''
     ? players.slice(0, 50)
     : players.filter(p =>
-        p.playerName.toLowerCase().includes(query.toLowerCase())
+        p.name.toLowerCase().includes(query.toLowerCase())
       ).slice(0, 50);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export function GolferSearch({
         )}
         onClick={() => setOpen(v => !v)}
       >
-        <span className="truncate">{selected ? selected.playerName : placeholder}</span>
+        <span className="truncate">{selected ? selected.name : placeholder}</span>
         {selected && (
           <span
             role="button"
@@ -82,9 +82,9 @@ export function GolferSearch({
               <li className="px-3 py-2 text-sm text-gray-400">No players found</li>
             )}
             {filtered.map(p => {
-              const disabled = disabledPlayerIds.includes(p.playerId) && p.playerId !== value;
+              const disabled = disabledPlayerIds.includes(p.id) && p.id !== value;
               return (
-                <li key={p.playerId}>
+                <li key={p.id}>
                   <button
                     type="button"
                     disabled={disabled}
@@ -93,20 +93,17 @@ export function GolferSearch({
                       disabled
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'hover:bg-green-50 text-gray-800',
-                      value === p.playerId && 'bg-green-50 font-medium',
+                      value === p.id && 'bg-green-50 font-medium',
                     )}
                     onClick={() => {
-                      onChange(p.playerId);
+                      onChange(p.id);
                       setOpen(false);
                       setQuery('');
                     }}
                   >
-                    <span className="font-medium">{p.playerName}</span>
-                    {p.worldRanking && (
-                      <span className="text-gray-400 ml-2 text-xs">#{p.worldRanking}</span>
-                    )}
-                    {p.countryCode && (
-                      <span className="text-gray-400 ml-1 text-xs">{p.countryCode}</span>
+                    <span className="font-medium">{p.name}</span>
+                    {p.position && p.position !== '-' && (
+                      <span className="text-gray-400 ml-2 text-xs">{p.position}</span>
                     )}
                   </button>
                 </li>

@@ -1,18 +1,17 @@
 import { useState } from 'react';
-import type { RankedTeam } from '@/types/fantasy';
-import type { NormalizedPlayer } from '@/types/scoring';
+import type { TeamResult } from '@/lib/scoring/fantasyEngine';
 import { formatToPar, scoreClass } from '@/utils/scoring';
 import { Card } from '@/components/ui/Card';
 import { TeamScoreTable } from './TeamScoreTable';
 import { cn } from '@/utils/cn';
 
 interface TeamCardProps {
-  team: RankedTeam;
-  players: NormalizedPlayer[];
+  team: TeamResult;
 }
 
-export function TeamCard({ team, players }: TeamCardProps) {
+export function TeamCard({ team }: TeamCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const rankDisplay = team.isTied ? `T${team.rank}` : String(team.rank);
 
   return (
     <Card noPad className="overflow-hidden">
@@ -28,13 +27,13 @@ export function TeamCard({ team, players }: TeamCardProps) {
             {team.rank}
           </span>
           <div>
-            <p className="font-semibold text-gray-900 text-sm">{team.name}</p>
-            <p className="text-xs text-gray-500">{team.rankDisplay}</p>
+            <p className="font-semibold text-gray-900 text-sm">{team.teamName}</p>
+            <p className="text-xs text-gray-500">{rankDisplay}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <span className={cn('text-xl font-bold', scoreClass(team.computedTotalToPar))}>
-            {formatToPar(team.computedTotalToPar)}
+          <span className={cn('text-xl font-bold', scoreClass(team.totalScore))}>
+            {formatToPar(team.totalScore)}
           </span>
           <svg
             className={cn('w-4 h-4 text-gray-400 transition-transform', expanded && 'rotate-180')}
@@ -47,7 +46,7 @@ export function TeamCard({ team, players }: TeamCardProps) {
 
       {expanded && (
         <div className="px-4 pb-3 border-t border-gray-50">
-          <TeamScoreTable team={team} players={players} />
+          <TeamScoreTable team={team} />
         </div>
       )}
     </Card>

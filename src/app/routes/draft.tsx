@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { listTournaments } from '@/lib/firebase/tournaments';
-import { useTournamentField } from '@/features/tournament/useTournamentField';
 import { TournamentSelector } from '@/components/draft/TournamentSelector';
 import { DraftForm } from '@/components/draft/DraftForm';
 import { Spinner } from '@/components/ui/Spinner';
-import { ErrorState } from '@/components/ui/ErrorState';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
@@ -15,9 +13,7 @@ export function Draft() {
   const { isAdmin, loading } = useAuth();
   const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
 
-  const { data: players = [], isLoading: loadingPlayers, isError: playersError } = useTournamentField(selectedTournament);
-
-  // Suppress unused warning - tournaments query is used via TournamentSelector
+  // Pre-warm the tournaments query (used by TournamentSelector)
   useQuery({ queryKey: ['tournaments'], queryFn: listTournaments });
 
   if (loading) {
@@ -48,25 +44,10 @@ export function Draft() {
         />
 
         {selectedTournament && (
-          <>
-            {loadingPlayers && (
-              <div className="flex justify-center py-8">
-                <Spinner className="text-golf-green" />
-              </div>
-            )}
-
-            {playersError && (
-              <ErrorState message="Failed to load player field." />
-            )}
-
-            {!loadingPlayers && !playersError && (
-              <DraftForm
-                tournament={selectedTournament}
-                players={players}
-                isLocked={selectedTournament.isLocked}
-              />
-            )}
-          </>
+          <DraftForm
+            tournament={selectedTournament}
+            isLocked={selectedTournament.isLocked}
+          />
         )}
       </div>
     </PageWrapper>

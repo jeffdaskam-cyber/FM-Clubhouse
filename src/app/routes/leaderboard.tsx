@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { listTournaments } from '@/lib/firebase/tournaments';
-import { useLiveTournament } from '@/features/tournament/useLiveTournament';
+import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useFantasyLeague } from '@/features/fantasy/useFantasyLeague';
 import { LeaderboardTable } from '@/components/leaderboard/LeaderboardTable';
 import { ScoreboardHeader } from '@/components/scoreboard/ScoreboardHeader';
@@ -19,12 +19,15 @@ export function Leaderboard() {
     queryFn: listTournaments,
   });
 
-  const activeTournament = tournaments.find(t => t.id === selectedId) ??
+  const activeTournament =
+    tournaments.find(t => t.id === selectedId) ??
     tournaments.find(t => t.status === 'active') ??
     null;
 
-  const { data: liveData, isLoading: loadingLive, isError, refetch } = useLiveTournament(activeTournament);
-  const { data: leagueData } = useFantasyLeague(activeTournament?.id ?? null);
+  const tournamentId = activeTournament?.id ?? '';
+
+  const { players, loading: loadingLive, error, lastUpdated, refresh } = useLeaderboard(tournamentId);
+  const { data: leagueData } = useFantasyLeague(tournamentId || null);
 
   const highlightedIds = new Set(
     leagueData?.teams.flatMap(t => t.golferIds) ?? []
@@ -50,7 +53,7 @@ export function Leaderboard() {
 
       <ScoreboardHeader
         tournament={activeTournament}
-        lastUpdated={liveData?.fetchedAt}
+        lastUpdated={lastUpdated?.toISOString()}
       />
 
       {isLoading && (
@@ -59,20 +62,20 @@ export function Leaderboard() {
         </div>
       )}
 
-      {!isLoading && isError && (
-        <ErrorState message="Failed to load leaderboard." onRetry={() => refetch()} />
+      {!isLoading && error && (
+        <ErrorState message="Failed to load leaderboard." onRetry={refresh} />
       )}
 
-      {!isLoading && !isError && !liveData?.players.length && (
+      {!isLoading && !error && players.length === 0 && (
         <EmptyState
           title="No leaderboard data"
           description="Scoring data will appear once the tournament begins."
         />
       )}
 
-      {!isLoading && !isError && (liveData?.players.length ?? 0) > 0 && (
+      {!isLoading && !error && players.length > 0 && (
         <LeaderboardTable
-          players={liveData!.players}
+          players={players}
           highlightedPlayerIds={highlightedIds}
         />
       )}

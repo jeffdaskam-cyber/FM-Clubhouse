@@ -1,10 +1,10 @@
-import type { NormalizedPlayer } from '@/types/scoring';
+import type { PlayerScore } from '@/lib/scoring';
 import { formatToPar, scoreClass } from '@/utils/scoring';
 import { StatusBadge } from '@/components/ui/Badge';
 import { cn } from '@/utils/cn';
 
 interface LeaderboardRowProps {
-  player: NormalizedPlayer;
+  player: PlayerScore;
   isHighlighted?: boolean;
 }
 
@@ -27,20 +27,20 @@ export function LeaderboardRow({ player, isHighlighted }: LeaderboardRowProps) {
       >
         <span className="text-right font-medium text-gray-600">{player.position}</span>
         <div className="flex items-center gap-2 min-w-0">
-          <span className="truncate font-medium">{player.playerName}</span>
+          <span className="truncate font-medium">{player.name}</span>
           {!isActive && <StatusBadge status={player.status} />}
         </div>
-        <span className={cn('text-right font-bold', scoreClass(player.totalToPar))}>
-          {formatToPar(player.totalToPar)}
+        <span className={cn('text-right font-bold', scoreClass(player.totalScore))}>
+          {formatToPar(player.totalScore)}
         </span>
-        <span className={cn('text-right', player.todaysScore !== null ? scoreClass(player.todaysScore) : 'text-gray-400')}>
-          {player.todaysScore !== null ? formatToPar(player.todaysScore) : '-'}
+        <span className={cn('text-right', scoreClass(player.todayScore))}>
+          {formatToPar(player.todayScore)}
         </span>
         <span className="text-right text-gray-600">{player.thru}</span>
-        <RoundCell score={player.roundScores[0]} />
-        <RoundCell score={player.roundScores[1]} />
-        <RoundCell score={player.roundScores[2]} />
-        <RoundCell score={player.roundScores[3]} />
+        <RoundCell score={player.r1} />
+        <RoundCell score={player.r2} />
+        <RoundCell score={player.r3} />
+        <RoundCell score={player.r4} />
         <span className="text-right text-gray-500">
           {player.totalStrokes ?? '-'}
         </span>
@@ -57,19 +57,17 @@ export function LeaderboardRow({ player, isHighlighted }: LeaderboardRowProps) {
           <span className="text-sm text-gray-500 w-8 text-right shrink-0">{player.position}</span>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <span className="text-sm font-medium truncate">{player.playerName}</span>
+              <span className="text-sm font-medium truncate">{player.name}</span>
               {!isActive && <StatusBadge status={player.status} />}
             </div>
             <div className="text-xs text-gray-400 mt-0.5">
               Thru {player.thru}
-              {player.todaysScore !== null && (
-                <> &bull; Today: <span className={scoreClass(player.todaysScore)}>{formatToPar(player.todaysScore)}</span></>
-              )}
+              {' '}&bull; Today: <span className={scoreClass(player.todayScore)}>{formatToPar(player.todayScore)}</span>
             </div>
           </div>
         </div>
-        <span className={cn('text-base font-bold shrink-0 ml-2', scoreClass(player.totalToPar))}>
-          {formatToPar(player.totalToPar)}
+        <span className={cn('text-base font-bold shrink-0 ml-2', scoreClass(player.totalScore))}>
+          {formatToPar(player.totalScore)}
         </span>
       </div>
     </>

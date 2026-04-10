@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /c/Users/jeffd/Documents/FM-Clubhouse add .npmrc)",
+      "Bash(git -C /c/Users/jeffd/Documents/FM-Clubhouse commit -m 'Add .npmrc with legacy-peer-deps for Vite 8 compatibility on Vercel:*)",
+      "Bash(git -C /c/Users/jeffd/Documents/FM-Clubhouse push origin main)"
+    ]
+  }
+}
