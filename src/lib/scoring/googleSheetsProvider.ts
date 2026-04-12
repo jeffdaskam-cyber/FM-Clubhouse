@@ -25,6 +25,22 @@ function parseScoreRequired(raw: string): number {
   return parseScore(raw) ?? 0;
 }
 
+/**
+ * Parse a single-round to-par score. Returns null if the value is
+ * non-numeric OR outside ±25 — the latter catches total-stroke counts
+ * (e.g. 72, 148) that some sheets write into R3/R4 cells for MC/WD
+ * players instead of leaving them blank.
+ *
+ * A legitimate to-par round score at a PGA Tour major is never outside
+ * roughly ±20. Absolute stroke totals (68–90) always exceed this ceiling.
+ */
+function parseRoundScore(raw: string): number | null {
+  const n = parseScore(raw);
+  if (n === null) return null;
+  if (Math.abs(n) > 25) return null;  // reject stroke-count bleed-over
+  return n;
+}
+
 /** Slugify a player name into a stable ID: "Rory McIlroy" → "rory-mcilroy" */
 function slugify(name: string): string {
   return name
@@ -118,11 +134,13 @@ export async function fetchLeaderboard(): Promise<PlayerScore[]> {
       const name = row[PLAYER] ?? '';
       const thru = row[THRU]   ?? '';
 
-      // Parse round scores first — needed for totalScore fallback below
-      const r1 = parseScore(row[R1] ?? '');
-      const r2 = parseScore(row[R2] ?? '');
-      const r3 = parseScore(row[R3] ?? '');
-      const r4 = parseScore(row[R4] ?? '');
+      // Parse round scores first — needed for totalScore fallback below.
+      // parseRoundScore rejects implausibly large values (stroke totals)
+      // that some sheets write into R3/R4 cells for MC/WD players.
+      const r1 = parseRoundScore(row[R1] ?? '');
+      const r2 = parseRoundScore(row[R2] ?? '');
+      const r3 = parseRoundScore(row[R3] ?? '');
+      const r4 = parseRoundScore(row[R4] ?? '');
 
       // The SCORE cell for MC/WD players often contains the status text ("MC",
       // "WD", "CUT") instead of a number. When that happens parseScore returns
