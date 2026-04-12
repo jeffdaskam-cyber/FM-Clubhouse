@@ -118,17 +118,32 @@ export async function fetchLeaderboard(): Promise<PlayerScore[]> {
       const name = row[PLAYER] ?? '';
       const thru = row[THRU]   ?? '';
 
+      // Parse round scores first — needed for totalScore fallback below
+      const r1 = parseScore(row[R1] ?? '');
+      const r2 = parseScore(row[R2] ?? '');
+      const r3 = parseScore(row[R3] ?? '');
+      const r4 = parseScore(row[R4] ?? '');
+
+      // The SCORE cell for MC/WD players often contains the status text ("MC",
+      // "WD", "CUT") instead of a number. When that happens parseScore returns
+      // null, and we derive the total by summing available round scores so that
+      // a player who shot +3/+3 and missed the cut still contributes +6, not 0.
+      const rawTotal = parseScore(row[SCORE] ?? '');
+      const totalScore = rawTotal !== null
+        ? rawTotal
+        : (r1 ?? 0) + (r2 ?? 0) + (r3 ?? 0) + (r4 ?? 0);
+
       return {
         id:             slugify(name),
         name:           name.trim(),
         position:       pos.trim(),
-        totalScore:     parseScoreRequired(row[SCORE] ?? ''),
+        totalScore,
         todayScore:     parseScoreRequired(row[TODAY] ?? ''),
         thru:           thru.trim() || '-',
-        r1:             parseScore(row[R1] ?? ''),
-        r2:             parseScore(row[R2] ?? ''),
-        r3:             parseScore(row[R3] ?? ''),
-        r4:             parseScore(row[R4] ?? ''),
+        r1,
+        r2,
+        r3,
+        r4,
         totalStrokes:   parseScore(row[TOT] ?? ''),
         status:         deriveStatus(thru, pos),
         finishPosition: parseFinishPosition(pos),
