@@ -96,9 +96,7 @@ export function Home() {
             Fantasy Standings
           </h2>
           {standings.map(team => (
-            <div key={team.teamId} className="px-2 sm:px-0">
-              <TeamCard team={team} />
-            </div>
+            <TeamCard key={team.teamId} team={team} />
           ))}
         </div>
       )}
