@@ -32,5 +32,14 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Force page reload when a new service worker takes control,
+      // so users always get the latest CSS/JS without manual cache clearing.
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('controllerchange', function() {
+          window.location.reload();
+        });
+      }
+    </script>
   </body>
 </html>
