@@ -11,7 +11,7 @@ export function ScoreboardHeader({ tournament, lastUpdated }: ScoreboardHeaderPr
   if (!tournament) return null;
 
   return (
-    <div className="bg-green-800 text-white rounded-xl p-4 mb-6">
+    <div className="bg-green-800 text-white rounded-none sm:rounded-xl px-4 py-4 mb-4 sm:mb-6">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
         <div>
           <h1 className="text-lg font-bold text-gold-400">{tournament.name}</h1>
