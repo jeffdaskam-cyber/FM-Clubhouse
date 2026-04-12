@@ -14,7 +14,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 
 export function Home() {
-  const { user } = useAuth();
+  const { userProfile } = useAuth();
   const [selectedTournamentId, setSelectedTournamentId] = useState<string>('');
 
   const { data: tournaments = [], isLoading: loadingTournaments } = useQuery({
@@ -98,7 +98,7 @@ export function Home() {
             Fantasy Standings
           </h2>
           {standings.map(team => (
-            <TeamCard key={team.teamId} team={team} isCurrentUser={!!user && team.ownerUid === user.uid} />
+            <TeamCard key={team.teamId} team={team} isCurrentUser={team.teamId === userProfile?.teamId} />
           ))}
         </div>
       )}
