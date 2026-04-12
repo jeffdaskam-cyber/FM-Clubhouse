@@ -221,7 +221,7 @@ export function Settings() {
 
   return (
     <PageWrapper>
-      <h1 className="text-xl font-bold text-neutral-900 mb-6">Settings</h1>
+      <h1 className="text-xl font-bold text-neutral-900 mb-6 px-3 sm:px-0">Settings</h1>
 
       <div className="space-y-4">
         <CreateTournamentCard

@@ -14,7 +14,7 @@ export function TeamCard({ team }: TeamCardProps) {
   const rankDisplay = team.isTied ? `T${team.rank}` : String(team.rank);
 
   return (
-    <Card noPad className="overflow-hidden !rounded-none sm:!rounded-xl !border-neutral-300">
+    <Card noPad className="overflow-hidden !border-neutral-300 !border-x-0 sm:!border-x">
       <button
         className="w-full flex items-center justify-between px-4 py-3 hover:bg-neutral-50 transition-colors text-left"
         onClick={() => setExpanded(v => !v)}

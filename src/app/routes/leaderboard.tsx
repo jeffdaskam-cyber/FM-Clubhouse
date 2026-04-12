@@ -37,7 +37,7 @@ export function Leaderboard() {
 
   return (
     <PageWrapper>
-      <div className="mb-4">
+      <div className="mb-4 px-3 sm:px-0">
         <Select
           label="Tournament"
           value={selectedId || activeTournament?.id || ''}

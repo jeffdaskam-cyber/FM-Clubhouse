@@ -47,7 +47,7 @@ export function Home() {
 
   return (
     <PageWrapper>
-      <div className="mb-4">
+      <div className="mb-4 px-3 sm:px-0">
         <Select
           label="Tournament"
           value={selectedTournamentId}
@@ -92,7 +92,7 @@ export function Home() {
 
       {!isLoading && standings.length > 0 && (
         <div className="space-y-2">
-          <h2 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide">
+          <h2 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide px-3 sm:px-0">
             Fantasy Standings
           </h2>
           {standings.map(team => (

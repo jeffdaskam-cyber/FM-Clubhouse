@@ -35,7 +35,7 @@ export function Draft() {
 
   return (
     <PageWrapper>
-      <h1 className="text-xl font-bold text-gray-900 mb-6">Admin Draft</h1>
+      <h1 className="text-xl font-bold text-gray-900 mb-6 px-3 sm:px-0">Admin Draft</h1>
 
       <div className="space-y-6">
         <TournamentSelector
