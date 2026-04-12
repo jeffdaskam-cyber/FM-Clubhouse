@@ -30,9 +30,14 @@ export function resolveTeamGolfers(
   });
 }
 
-/** Team total = sum of all 3 golfer scores */
+/** Team total = sum of all 3 golfer scores.
+ *  Guards against NaN in case a golfer's totalScore was not cleanly parsed
+ *  (e.g. a MC/WD player whose sheet cell contained non-numeric text). */
 export function calcTeamTotal(golfers: PlayerScore[]): number {
-  return golfers.reduce((sum, g) => sum + g.totalScore, 0);
+  return golfers.reduce((sum, g) => {
+    const score = Number.isFinite(g.totalScore) ? g.totalScore : 0;
+    return sum + score;
+  }, 0);
 }
 
 /**

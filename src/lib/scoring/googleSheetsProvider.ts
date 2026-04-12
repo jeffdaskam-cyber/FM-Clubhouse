@@ -8,12 +8,16 @@ const SHEET_CSV_URL =
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Convert "E", "+3", "-5", "--", "" to a number or null */
+/** Convert "E", "+3", "-5", "--", "" to a number or null.
+ *  Non-numeric strings (e.g. "MC", "WD", "CUT") return null — never NaN. */
 function parseScore(raw: string): number | null {
   const s = raw.trim();
   if (!s || s === '--' || s === '-') return null;
   if (s === 'E') return 0;
-  return parseInt(s, 10);
+  const n = parseInt(s, 10);
+  // parseInt("MC",10) → NaN. NaN is NOT null, so `?? 0` would pass it through.
+  // Normalise to null here so callers can safely use `?? 0`.
+  return isNaN(n) ? null : n;
 }
 
 /** Convert "E", "+3", "-5" to a number (defaults to 0 for unparseable) */
