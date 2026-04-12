@@ -7,9 +7,10 @@ import { cn } from '@/utils/cn';
 
 interface TeamCardProps {
   team: TeamResult;
+  isCurrentUser?: boolean;
 }
 
-export function TeamCard({ team }: TeamCardProps) {
+export function TeamCard({ team, isCurrentUser = false }: TeamCardProps) {
   const [expanded, setExpanded] = useState(false);
   const rankDisplay = team.isTied ? `T${team.rank}` : String(team.rank);
 
@@ -22,7 +23,7 @@ export function TeamCard({ team }: TeamCardProps) {
         <div className="flex items-center gap-3">
           <span className={cn(
             'font-pos w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0',
-            rankBadgeClass(team.rank),
+            rankBadgeClass(team.rank, isCurrentUser),
           )}>
             {rankDisplay}
           </span>

@@ -11,8 +11,10 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { Select } from '@/components/ui/Select';
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 export function Home() {
+  const { user } = useAuth();
   const [selectedTournamentId, setSelectedTournamentId] = useState<string>('');
 
   const { data: tournaments = [], isLoading: loadingTournaments } = useQuery({
@@ -37,7 +39,7 @@ export function Home() {
 
   const standings = leagueData
     ? buildFantasyStandings(
-        leagueData.teams.map(t => ({ teamId: t.id, teamName: t.name, golferIds: t.golferIds })),
+        leagueData.teams.map(t => ({ teamId: t.id, teamName: t.name, golferIds: t.golferIds, ownerUid: t.ownerUid })),
         players,
       )
     : [];
@@ -96,7 +98,7 @@ export function Home() {
             Fantasy Standings
           </h2>
           {standings.map(team => (
-            <TeamCard key={team.teamId} team={team} />
+            <TeamCard key={team.teamId} team={team} isCurrentUser={!!user && team.ownerUid === user.uid} />
           ))}
         </div>
       )}

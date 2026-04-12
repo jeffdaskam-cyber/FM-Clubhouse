@@ -8,6 +8,7 @@ export interface TeamResult {
   totalScore:  number;
   rank:        number;
   isTied:      boolean;
+  ownerUid:    string | null;
 }
 
 /** Resolve golfer IDs against live leaderboard data */
@@ -89,6 +90,7 @@ export interface RawTeam {
   teamId:    string;
   teamName:  string;
   golferIds: string[];
+  ownerUid:  string | null;
 }
 
 /** Master helper: raw team records + live players → fully ranked results */
