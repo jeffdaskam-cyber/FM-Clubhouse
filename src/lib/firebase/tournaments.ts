@@ -24,6 +24,9 @@ function fromFirestore(data: Record<string, unknown>, id: string): Tournament {
     providerTournamentId: data.providerTournamentId as string,
     par: data.par as number,
     isLocked: data.isLocked as boolean,
+    scoresLockedAt: data.scoresLockedAt
+      ? (data.scoresLockedAt as Timestamp).toDate().toISOString()
+      : null,
   };
 }
 
@@ -51,6 +54,9 @@ export async function saveTournament(t: Tournament): Promise<void> {
     ...t,
     startDate: Timestamp.fromDate(new Date(t.startDate)),
     endDate: Timestamp.fromDate(new Date(t.endDate)),
+    scoresLockedAt: t.scoresLockedAt
+      ? Timestamp.fromDate(new Date(t.scoresLockedAt))
+      : null,
   });
 }
 

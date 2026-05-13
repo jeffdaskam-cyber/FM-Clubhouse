@@ -10,6 +10,10 @@ import { Input } from '@/components/ui/Input';
 import { Spinner } from '@/components/ui/Spinner';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { EditTeamsCard } from '@/components/settings/EditTeamsCard';
+import { LockTournamentButton } from '@/components/admin/LockTournamentButton';
+import { useLeaderboard } from '@/hooks/useLeaderboard';
+import { useFantasyLeague } from '@/features/fantasy/useFantasyLeague';
+import { buildFantasyStandings } from '@/lib/scoring/fantasyEngine';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
 import { Link } from 'react-router-dom';
@@ -98,6 +102,7 @@ function CreateTournamentCard({ onCreated }: { onCreated: () => void }) {
         scoringProvider:     'sportradar',
         providerTournamentId: '',
         isLocked:            false,
+        scoresLockedAt:      null,
       });
       setSuccess(`"${name} ${year}" created! (ID: ${id})`);
       setForm(EMPTY_FORM);
@@ -192,6 +197,20 @@ export function Settings() {
   const selectedTournament = tournaments.find(t => t.id === selectedTournamentId) ?? null;
   const activeLeague = leagues[leagues.length - 1] ?? null;
 
+  const { players } = useLeaderboard(selectedTournamentId);
+  const { data: leagueData } = useFantasyLeague(selectedTournamentId || null);
+  const fantasyStandings = leagueData
+    ? buildFantasyStandings(
+        leagueData.teams.map(t => ({
+          teamId: t.id,
+          teamName: t.name,
+          golferIds: t.golferIds,
+          ownerUid: t.ownerUid,
+        })),
+        players,
+      )
+    : [];
+
   async function handleToggleLock() {
     if (!selectedTournament) return;
     setWorking(true);
@@ -261,6 +280,22 @@ export function Settings() {
                     {working ? 'Working…' : selectedTournament.isLocked ? 'Unlock Draft' : 'Lock Draft'}
                   </Button>
                   {message && <p className="text-sm text-green-600">{message}</p>}
+
+                  <div className="pt-3 mt-3 border-t border-neutral-200">
+                    <p className="text-xs text-neutral-500 mb-2">
+                      Freezing scores writes the final leaderboard and fantasy standings to Firestore.
+                      Once locked, the scoreboard ignores the live Sheet for this tournament.
+                    </p>
+                    <LockTournamentButton
+                      tournamentId={selectedTournament.id}
+                      tournamentName={`${selectedTournament.name} ${selectedTournament.year}`}
+                      fantasyStandings={fantasyStandings}
+                      isAlreadyLocked={!!selectedTournament.scoresLockedAt}
+                      onLocked={() =>
+                        queryClient.invalidateQueries({ queryKey: ['tournaments'] })
+                      }
+                    />
+                  </div>
                 </div>
               )}
             </div>
