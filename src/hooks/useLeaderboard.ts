@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { doc, setDoc, getDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { fetchLeaderboard } from '@/lib/scoring';
+import { fetchLeaderboardSnapshot } from '@/lib/scoring/tournamentLockService';
 import type { PlayerScore } from '@/lib/scoring';
 
 const POLL_INTERVAL_MS = 90_000; // 90 seconds
@@ -37,6 +38,26 @@ export function useLeaderboard(tournamentId: string): UseLeaderboardResult {
     }
   }, [tournamentId]);
 
+  // Returns true if the tournament is locked and the snapshot was loaded.
+  const loadFromSnapshotIfLocked = useCallback(async (): Promise<boolean> => {
+    try {
+      const tSnap = await getDoc(doc(db, 'tournaments', tournamentId));
+      if (!tSnap.exists()) return false;
+      const tData = tSnap.data();
+      const isComplete = tData.status === 'completed' && tData.scoresLockedAt;
+      if (!isComplete) return false;
+
+      const rows = await fetchLeaderboardSnapshot(tournamentId);
+      if (rows.length === 0) return false;
+      setPlayers(rows);
+      const lockedAt = tData.scoresLockedAt?.toDate?.() ?? null;
+      setLastUpdated(lockedAt);
+      return true;
+    } catch {
+      return false;
+    }
+  }, [tournamentId]);
+
   const fetchLive = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     setError(null);
@@ -66,18 +87,25 @@ export function useLeaderboard(tournamentId: string): UseLeaderboardResult {
     let cancelled = false;
 
     (async () => {
+      // If this tournament's scores are locked, read frozen snapshot and stop polling.
+      const locked = await loadFromSnapshotIfLocked();
+      if (locked) {
+        if (!cancelled) setLoading(false);
+        return;
+      }
+
       const cacheHit = await loadFromCache();
       if (cacheHit && !cancelled) setLoading(false);
       if (!cancelled) await fetchLive(cacheHit);
-    })();
 
-    intervalRef.current = setInterval(() => fetchLive(true), POLL_INTERVAL_MS);
+      intervalRef.current = setInterval(() => fetchLive(true), POLL_INTERVAL_MS);
+    })();
 
     return () => {
       cancelled = true;
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [tournamentId, loadFromCache, fetchLive]);
+  }, [tournamentId, loadFromCache, loadFromSnapshotIfLocked, fetchLive]);
 
   return { players, lastUpdated, loading, error, refresh: () => fetchLive(false) };
 }

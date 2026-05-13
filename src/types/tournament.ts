@@ -24,6 +24,7 @@ export interface Tournament {
   providerTournamentId: string;
   par: number;
   isLocked: boolean;
+  scoresLockedAt: string | null; // ISO string; non-null means leaderboard is frozen in Firestore snapshot
 }
 
 export const SUPPORTED_TOURNAMENTS: { slug: TournamentSlug; name: string }[] = [
