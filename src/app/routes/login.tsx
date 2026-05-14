@@ -57,6 +57,15 @@ export function Login() {
     if (!email.trim()) return;
     setWorking(true);
     setError('');
+    const allowed = (import.meta.env.VITE_ALLOWED_EMAILS as string | undefined ?? '')
+      .split(',')
+      .map(e => e.trim().toLowerCase())
+      .filter(Boolean);
+    if (!allowed.includes(email.trim().toLowerCase())) {
+      setError('This email is not registered for FM Clubhouse.');
+      setWorking(false);
+      return;
+    }
     try {
       await sendSignInLinkToEmail(auth, email.trim(), {
         url: `${window.location.origin}/login`,
