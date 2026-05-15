@@ -48,7 +48,10 @@ export function calcTeamTotal(golfers: PlayerScore[]): number {
  *   3. Tie → compare next-best finisher
  *   4. Still tied → teams remain tied
  */
-export function rankTeams(teams: Omit<TeamResult, 'rank' | 'isTied'>[]): TeamResult[] {
+export function rankTeams(
+  teams: Omit<TeamResult, 'rank' | 'isTied'>[],
+  isTournamentComplete = false,
+): TeamResult[] {
   const sorted = [...teams].sort((a, b) => {
     if (a.totalScore !== b.totalScore) return a.totalScore - b.totalScore;
 
@@ -65,12 +68,18 @@ export function rankTeams(teams: Omit<TeamResult, 'rank' | 'isTied'>[]): TeamRes
   for (let i = 0; i < sorted.length; i++) {
     const prev = ranked[i - 1];
     const cur  = sorted[i];
-    const tied = prev
-      ? prev.totalScore === cur.totalScore &&
-        JSON.stringify(prev.golfers.map(g => g.finishPosition).sort()) ===
-        JSON.stringify(cur.golfers.map(g => g.finishPosition).sort())
-      : false;
 
+    const sameScore    = prev ? prev.totalScore === cur.totalScore : false;
+    const prevIsFirst  = prev?.rank === 1;
+    const tiedForFirst = sameScore && prevIsFirst;
+    const tiebreakerResolvesFirst = (() => {
+      if (!isTournamentComplete || !tiedForFirst) return false;
+      const prevPos = prev!.golfers.map(g => g.finishPosition).sort((x, y) => x - y);
+      const curPos  = cur.golfers.map(g => g.finishPosition).sort((x, y) => x - y);
+      return JSON.stringify(prevPos) !== JSON.stringify(curPos);
+    })();
+
+    const tied = sameScore && !tiebreakerResolvesFirst;
     const assignedRank = tied ? prev!.rank : rank;
     ranked.push({ ...cur, rank: assignedRank, isTied: tied });
     if (!tied) rank = i + 2;
@@ -95,13 +104,14 @@ export interface RawTeam {
 
 /** Master helper: raw team records + live players → fully ranked results */
 export function buildFantasyStandings(
-  rawTeams: RawTeam[],
-  players:  PlayerScore[]
+  rawTeams:             RawTeam[],
+  players:              PlayerScore[],
+  isTournamentComplete = false,
 ): TeamResult[] {
   const withScores = rawTeams.map(t => {
     const golfers    = resolveTeamGolfers(t.golferIds, players);
     const totalScore = calcTeamTotal(golfers);
     return { ...t, golfers, totalScore };
   });
-  return rankTeams(withScores);
+  return rankTeams(withScores, isTournamentComplete);
 }

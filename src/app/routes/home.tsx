@@ -43,6 +43,7 @@ export function Home() {
     ? buildFantasyStandings(
         leagueData.teams.map(t => ({ teamId: t.id, teamName: t.name, golferIds: t.golferIds, ownerUid: t.ownerUid })),
         players,
+        activeTournament?.status === 'completed',
       )
     : [];
 
