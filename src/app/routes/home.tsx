@@ -3,7 +3,8 @@ import { listTournaments } from '@/lib/firebase/tournaments';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useFantasyLeague } from '@/features/fantasy/useFantasyLeague';
 import { buildFantasyStandings } from '@/lib/scoring/fantasyEngine';
-import { ScoreboardHeader } from '@/components/scoreboard/ScoreboardHeader';
+import { Masthead } from '@/components/layout/Masthead';
+import { LiveStrip } from '@/components/layout/LiveStrip';
 import { TeamCard } from '@/components/scoreboard/TeamCard';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -47,9 +48,16 @@ export function Home() {
   // Only block on live/league loading once a tournament is actually selected
   const isLoading = loadingTournaments || (!!selectedTournamentId && (loadingLive || loadingLeague));
 
+  const leader = players.length > 0
+    ? [...players].sort((a, b) => a.totalScore - b.totalScore)[0]
+    : null;
+
   return (
     <PageWrapper>
-      <div className="mb-4 px-3 sm:px-0">
+      <Masthead tournament={activeTournament} />
+      <LiveStrip tournament={activeTournament} leader={leader} lastUpdated={lastUpdated} />
+
+      <div className="my-6 max-w-md">
         <Select
           label="Tournament"
           value={selectedTournamentId}
@@ -62,11 +70,6 @@ export function Home() {
           ))}
         </Select>
       </div>
-
-      <ScoreboardHeader
-        tournament={activeTournament}
-        lastUpdated={lastUpdated?.toISOString()}
-      />
 
       {isLoading && (
         <div className="flex justify-center py-16">

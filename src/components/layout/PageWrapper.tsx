@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 export function PageWrapper({ children }: { children: ReactNode }) {
   return (
-    <main className="w-full max-w-5xl mx-auto px-0 sm:px-4 py-4 sm:py-6">
+    <main className="w-full max-w-[1280px] mx-auto px-4 sm:px-7 lg:px-9 py-6 sm:py-8">
       {children}
     </main>
   );

@@ -4,6 +4,24 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Editorial country-club tokens (light theme defaults; dark via CSS vars in index.css)
+        ink:        'var(--ink)',
+        'ink-soft': 'var(--ink-soft)',
+        muted:      'var(--muted)',
+        paper:      'var(--paper)',
+        'paper-warm': 'var(--paper-warm)',
+        surface:    'var(--surface)',
+        'surface-2':'var(--surface-2)',
+        hairline:        'var(--hairline)',
+        'hairline-soft': 'var(--hairline-soft)',
+        brass:           'var(--brass)',
+        'brass-bright':  'var(--brass-bright)',
+        'brass-soft':    'var(--brass-soft)',
+        'gold-tint':     'var(--gold-tint)',
+        'green-tint':    'var(--green-tint)',
+        'green-mid':     'var(--green-mid)',
+        'green-deep':    'var(--green-deep)',
+        'clubhouse':     '#1B4332',
         green: {
           50:  '#D8F3DC',
           100: '#B7E4C7',
@@ -60,7 +78,8 @@ export default {
       },
       fontFamily: {
         sans:    ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Barlow Condensed', 'sans-serif'],
+        display: ['Fraunces', 'Cormorant Garamond', 'Georgia', 'serif'],
+        serif:   ['Fraunces', 'Georgia', 'serif'],
         mono:    ['JetBrains Mono', 'monospace'],
       },
       fontSize: {

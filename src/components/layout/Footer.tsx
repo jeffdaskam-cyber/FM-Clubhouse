@@ -1,7 +1,18 @@
 export function Footer() {
   return (
-    <footer className="mt-auto py-4 text-center text-xs text-neutral-400 border-t border-neutral-200">
-      FM Clubhouse &mdash; Fantasy Golf Majors
+    <footer
+      className="mt-auto py-7 px-4 text-center border-t"
+      style={{ borderColor: 'var(--hairline)' }}
+    >
+      <div
+        className="font-serif italic text-[14px] tracking-[0.1em] text-brass"
+        style={{ color: 'var(--brass)' }}
+      >
+        FM Clubhouse
+      </div>
+      <div className="smallcaps text-[10px] mt-1.5" style={{ color: 'var(--muted)' }}>
+        Members Only · A Private Fantasy Society · Est. MMXXIV
+      </div>
     </footer>
   );
 }

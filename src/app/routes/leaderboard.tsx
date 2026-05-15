@@ -3,7 +3,8 @@ import { listTournaments } from '@/lib/firebase/tournaments';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useFantasyLeague } from '@/features/fantasy/useFantasyLeague';
 import { LeaderboardTable } from '@/components/leaderboard/LeaderboardTable';
-import { ScoreboardHeader } from '@/components/scoreboard/ScoreboardHeader';
+import { Masthead } from '@/components/layout/Masthead';
+import { LiveStrip } from '@/components/layout/LiveStrip';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
@@ -35,9 +36,16 @@ export function Leaderboard() {
 
   const isLoading = loadingT || loadingLive;
 
+  const leader = players.length > 0
+    ? [...players].sort((a, b) => a.totalScore - b.totalScore)[0]
+    : null;
+
   return (
     <PageWrapper>
-      <div className="mb-4 px-3 sm:px-0">
+      <Masthead tournament={activeTournament} />
+      <LiveStrip tournament={activeTournament} leader={leader} lastUpdated={lastUpdated} />
+
+      <div className="my-6 max-w-md">
         <Select
           label="Tournament"
           value={selectedId || activeTournament?.id || ''}
@@ -50,11 +58,6 @@ export function Leaderboard() {
           ))}
         </Select>
       </div>
-
-      <ScoreboardHeader
-        tournament={activeTournament}
-        lastUpdated={lastUpdated?.toISOString()}
-      />
 
       {isLoading && (
         <div className="flex justify-center py-16">
