@@ -45,7 +45,7 @@ export function NavBar() {
               FM <em className="not-italic font-serif italic text-brass-bright">Clubhouse</em>
             </div>
             <div className="smallcaps text-[9px] text-[#A8B6A2] mt-0.5">
-              Est. MMXXIV · Members Only
+              Est. MMXXVI · Members Only
             </div>
           </div>
         </Link>
