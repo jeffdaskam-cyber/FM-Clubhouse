@@ -11,8 +11,10 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { Select } from '@/components/ui/Select';
 import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 export function Leaderboard() {
+  const { userProfile } = useAuth();
   const [selectedId, setSelectedId] = useState('');
 
   const { data: tournaments = [], isLoading: loadingT } = useQuery({
@@ -30,9 +32,11 @@ export function Leaderboard() {
   const { players, loading: loadingLive, error, lastUpdated, refresh } = useLeaderboard(tournamentId);
   const { data: leagueData } = useFantasyLeague(tournamentId || null);
 
-  const highlightedIds = new Set(
+  const rosteredIds = new Set(
     leagueData?.teams.flatMap(t => t.golferIds) ?? []
   );
+  const yourTeam = leagueData?.teams.find(t => t.id === userProfile?.teamId) ?? null;
+  const yourGolferIds = new Set(yourTeam?.golferIds ?? []);
 
   const isLoading = loadingT || loadingLive;
 
@@ -79,7 +83,9 @@ export function Leaderboard() {
       {!isLoading && !error && players.length > 0 && (
         <LeaderboardTable
           players={players}
-          highlightedPlayerIds={highlightedIds}
+          rosteredPlayerIds={rosteredIds}
+          yourGolferIds={yourGolferIds}
+          cutLine={3}
         />
       )}
     </PageWrapper>

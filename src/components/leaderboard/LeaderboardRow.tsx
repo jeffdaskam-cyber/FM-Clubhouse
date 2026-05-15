@@ -5,68 +5,208 @@ import { cn } from '@/utils/cn';
 
 interface LeaderboardRowProps {
   player: PlayerScore;
-  isHighlighted?: boolean;
+  isLeader?: boolean;
+  isRostered?: boolean;
+  isYours?: boolean;
+  zebra?: boolean;
 }
 
 function RoundCell({ score }: { score: number | null }) {
-  if (score === null) return <span className="text-right text-neutral-300">-</span>;
-  return <span className={cn('text-right font-score', scoreClass(score))}>{score}</span>;
+  if (score === null) {
+    return (
+      <span className="text-right font-score text-[14px]" style={{ color: 'var(--hairline)' }}>
+        —
+      </span>
+    );
+  }
+  return (
+    <span
+      className="text-right font-score text-[14px]"
+      style={{ color: 'var(--ink)' }}
+    >
+      {score}
+    </span>
+  );
 }
 
-export function LeaderboardRow({ player, isHighlighted }: LeaderboardRowProps) {
+export function LeaderboardRow({
+  player,
+  isLeader,
+  isRostered,
+  isYours,
+  zebra,
+}: LeaderboardRowProps) {
   const isActive = player.status === 'active';
+
+  // Background priority: leader > yours > rostered > zebra
+  const rowBg = isLeader
+    ? 'var(--gold-tint)'
+    : isYours
+    ? 'var(--green-tint)'
+    : isRostered
+    ? 'var(--green-tint)'
+    : zebra
+    ? 'var(--surface-2)'
+    : 'var(--surface)';
 
   return (
     <>
       {/* Desktop row */}
       <div
-        className={cn(
-          'hidden md:grid grid-cols-[3rem_1fr_5rem_5rem_5rem_4rem_4rem_4rem_4rem_5rem] gap-2 px-4 py-2.5 text-sm border-b border-neutral-100 last:border-0 transition-colors',
-          isHighlighted ? 'bg-green-50' : 'hover:bg-neutral-50',
-        )}
+        className="hidden md:grid relative grid-cols-[48px_1fr_70px_64px_56px_48px_48px_48px_48px_64px] gap-2 px-4 sm:px-6 py-3 border-b items-center text-[14px]"
+        style={{
+          background: rowBg,
+          borderColor: 'var(--hairline-soft)',
+        }}
       >
-        <span className="font-pos text-right font-semibold text-neutral-500">{player.position}</span>
+        {/* Leader brass rail */}
+        {isLeader && (
+          <span
+            className="absolute left-0 top-0 bottom-0 w-[3px]"
+            style={{
+              background:
+                'linear-gradient(180deg, var(--brass-bright), var(--brass))',
+            }}
+          />
+        )}
+        {/* Your-team green rail */}
+        {!isLeader && isYours && (
+          <span
+            className="absolute left-0 top-0 bottom-0 w-[2px]"
+            style={{ background: 'var(--green-mid)' }}
+          />
+        )}
+
+        {/* Pos */}
+        <span
+          className="text-right font-serif italic text-[19px]"
+          style={{ color: isLeader ? 'var(--brass)' : 'var(--ink)' }}
+        >
+          {player.position}
+        </span>
+
+        {/* Player */}
         <div className="flex items-center gap-2 min-w-0">
-          <span className="truncate font-medium text-neutral-900">{player.name}</span>
+          {isRostered && !isYours && (
+            <span
+              className="shrink-0 inline-block w-[6px] h-[6px] rounded-full"
+              style={{
+                background: 'var(--green-mid)',
+                boxShadow: '0 0 0 2px var(--green-tint)',
+              }}
+              aria-label="Rostered"
+              title="Rostered"
+            />
+          )}
+          <span
+            className="font-serif truncate"
+            style={{ fontSize: '17px', color: 'var(--ink)' }}
+            title={player.name}
+          >
+            {player.name}
+          </span>
+          {isLeader && (
+            <span
+              className="smallcaps text-[9px] px-2 py-0.5 rounded-full"
+              style={{
+                background:
+                  'linear-gradient(135deg, var(--brass-bright), var(--brass))',
+                color: '#1B2A22',
+              }}
+            >
+              Lead
+            </span>
+          )}
           {!isActive && <StatusBadge status={player.status} />}
         </div>
-        <span className={cn('text-right font-bold', scoreClass(player.totalScore))}>
+
+        {/* To Par */}
+        <span className={cn('text-right font-score font-semibold text-[16px]', scoreClass(player.totalScore))}>
           {formatToPar(player.totalScore)}
         </span>
+
+        {/* Today */}
         <span className={cn('text-right font-score', scoreClass(player.todayScore))}>
           {formatToPar(player.todayScore)}
         </span>
-        <span className="text-right text-neutral-500">{player.thru}</span>
+
+        {/* Thru */}
+        <span className="text-right font-score" style={{ color: 'var(--muted)' }}>
+          {player.thru}
+        </span>
+
         <RoundCell score={player.r1} />
         <RoundCell score={player.r2} />
         <RoundCell score={player.r3} />
         <RoundCell score={player.r4} />
-        <span className="text-right font-score text-neutral-500">
-          {player.totalStrokes ?? '-'}
+
+        {/* Strokes */}
+        <span className="text-right font-score text-[14px]" style={{ color: 'var(--muted)' }}>
+          {player.totalStrokes ?? '—'}
         </span>
       </div>
 
       {/* Mobile row */}
       <div
-        className={cn(
-          'md:hidden flex items-center justify-between px-4 py-2.5 border-b border-neutral-100 last:border-0',
-          isHighlighted && 'bg-green-50',
-        )}
+        className="md:hidden relative flex items-center justify-between px-4 py-3 border-b"
+        style={{
+          background: rowBg,
+          borderColor: 'var(--hairline-soft)',
+        }}
       >
+        {isLeader && (
+          <span
+            className="absolute left-0 top-0 bottom-0 w-[3px]"
+            style={{
+              background:
+                'linear-gradient(180deg, var(--brass-bright), var(--brass))',
+            }}
+          />
+        )}
+        {!isLeader && isYours && (
+          <span
+            className="absolute left-0 top-0 bottom-0 w-[2px]"
+            style={{ background: 'var(--green-mid)' }}
+          />
+        )}
         <div className="flex items-center gap-3 min-w-0">
-          <span className="font-pos text-sm font-semibold text-neutral-500 w-8 text-right shrink-0">{player.position}</span>
+          <span
+            className="font-serif italic text-[17px] w-8 text-right shrink-0"
+            style={{ color: isLeader ? 'var(--brass)' : 'var(--ink)' }}
+          >
+            {player.position}
+          </span>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <span className="text-sm font-medium text-neutral-900 truncate">{player.name}</span>
+              {isRostered && !isYours && (
+                <span
+                  className="shrink-0 inline-block w-[6px] h-[6px] rounded-full"
+                  style={{ background: 'var(--green-mid)' }}
+                />
+              )}
+              <span
+                className="font-serif text-[15px] truncate"
+                style={{ color: 'var(--ink)' }}
+              >
+                {player.name}
+              </span>
               {!isActive && <StatusBadge status={player.status} />}
             </div>
-            <div className="text-xs text-neutral-400 mt-0.5">
-              Thru {player.thru}
-              {' '}&bull; Today: <span className={cn('font-score', scoreClass(player.todayScore))}>{formatToPar(player.todayScore)}</span>
+            <div className="text-[11px] mt-0.5" style={{ color: 'var(--muted)' }}>
+              Thru {player.thru} ·{' '}
+              <span className={cn('font-score', scoreClass(player.todayScore))}>
+                {formatToPar(player.todayScore)}
+              </span>{' '}
+              today
             </div>
           </div>
         </div>
-        <span className={cn('text-base font-bold shrink-0 ml-2', scoreClass(player.totalScore))}>
+        <span
+          className={cn(
+            'font-score text-[18px] font-semibold shrink-0 ml-2',
+            scoreClass(player.totalScore),
+          )}
+        >
           {formatToPar(player.totalScore)}
         </span>
       </div>

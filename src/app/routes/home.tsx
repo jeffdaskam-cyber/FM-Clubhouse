@@ -6,6 +6,7 @@ import { buildFantasyStandings } from '@/lib/scoring/fantasyEngine';
 import { Masthead } from '@/components/layout/Masthead';
 import { LiveStrip } from '@/components/layout/LiveStrip';
 import { TeamCard } from '@/components/scoreboard/TeamCard';
+import { FeaturedTeam } from '@/components/scoreboard/FeaturedTeam';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
@@ -95,16 +96,35 @@ export function Home() {
         />
       )}
 
-      {!isLoading && standings.length > 0 && (
-        <div className="space-y-2">
-          <h2 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide px-3 sm:px-0">
-            Fantasy Standings
-          </h2>
-          {standings.map(team => (
-            <TeamCard key={team.teamId} team={team} isCurrentUser={team.teamId === userProfile?.teamId} />
-          ))}
-        </div>
-      )}
+      {!isLoading && standings.length > 0 && (() => {
+        const yourTeam = standings.find(t => t.teamId === userProfile?.teamId) ?? null;
+        return (
+          <>
+            {yourTeam && <FeaturedTeam team={yourTeam} />}
+
+            <div className="border" style={{ borderColor: 'var(--hairline)', background: 'var(--surface)' }}>
+              <div
+                className="flex items-baseline justify-between px-4 sm:px-6 py-4 border-b"
+                style={{ borderColor: 'var(--hairline)' }}
+              >
+                <h2 className="font-serif italic" style={{ fontSize: '26px', color: 'var(--ink)' }}>
+                  The Standings
+                </h2>
+                <div className="smallcaps text-[10px]" style={{ color: 'var(--muted)' }}>
+                  {standings.length} Teams · {standings.length * 3} Golfers in Field
+                </div>
+              </div>
+              {standings.map(team => (
+                <TeamCard
+                  key={team.teamId}
+                  team={team}
+                  isCurrentUser={team.teamId === userProfile?.teamId}
+                />
+              ))}
+            </div>
+          </>
+        );
+      })()}
     </PageWrapper>
   );
 }
