@@ -48,9 +48,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user.email?.toLowerCase() === adminEmail.toLowerCase();
   const isUser = !loading && user !== null && !isAdmin;
 
-  // Load Firestore profile for non-admin users only
+  // Load Firestore profile for all authenticated users (admin and regular).
+  // Admins need a profile so their FeaturedTeam card renders on the Scoreboard.
   useEffect(() => {
-    if (!isUser || !user) return;
+    if (loading || !user) return;
     let cancelled = false;
     setProfileLoading(true);
     getUserProfile(user.uid)
@@ -64,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!cancelled) setProfileLoading(false);
       });
     return () => { cancelled = true; };
-  }, [isUser, user]);
+  }, [loading, user]);
 
   return (
     <AuthContext.Provider value={{ user, loading, isAdmin, isUser, userProfile, profileLoading }}>

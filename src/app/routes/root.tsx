@@ -10,7 +10,7 @@ function RootContent() {
   const { isUser, userProfile, profileLoading } = useAuth();
 
   // Non-admin user who hasn't claimed a team yet
-  const showClaimScreen = isUser && !profileLoading && userProfile === null;
+  const showClaimScreen = isUser && !profileLoading && (!userProfile || !userProfile.teamId);
 
   // Still resolving whether the user has a profile — show a brief spinner
   // instead of flashing the claim screen before the profile loads

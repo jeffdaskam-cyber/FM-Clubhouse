@@ -16,6 +16,7 @@ import { useFantasyLeague } from '@/features/fantasy/useFantasyLeague';
 import { buildFantasyStandings } from '@/lib/scoring/fantasyEngine';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
+import { saveUserProfile } from '@/lib/firebase/userProfiles';
 import { Link } from 'react-router-dom';
 import { formatDate } from '@/utils/date';
 import { SUPPORTED_TOURNAMENTS } from '@/utils/constants';
@@ -176,8 +177,125 @@ function CreateTournamentCard({ onCreated }: { onCreated: () => void }) {
   );
 }
 
+interface AdminTeamCardProps {
+  adminUid: string;
+  adminEmail: string;
+  currentTeamId: string | undefined;
+  currentTournamentId: string | undefined;
+}
+
+function AdminTeamCard({
+  adminUid,
+  adminEmail,
+  currentTeamId,
+  currentTournamentId,
+}: AdminTeamCardProps) {
+  const [selectedTournamentId, setSelectedTournamentId] = useState(
+    currentTournamentId ?? '',
+  );
+  const [selectedTeamId, setSelectedTeamId] = useState(currentTeamId ?? '');
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const { data: tournaments = [] } = useQuery({
+    queryKey: ['tournaments'],
+    queryFn: listTournaments,
+  });
+
+  const { data: leagueData } = useFantasyLeague(selectedTournamentId || null);
+  const teams = leagueData?.teams ?? [];
+
+  async function handleSave() {
+    if (!selectedTournamentId || !selectedTeamId) {
+      setMessage('Please select both a tournament and a team.');
+      return;
+    }
+    setSaving(true);
+    setMessage('');
+    try {
+      await saveUserProfile({
+        uid: adminUid,
+        email: adminEmail,
+        teamId: selectedTeamId,
+        tournamentId: selectedTournamentId,
+      });
+      setMessage('Team saved!');
+    } catch {
+      setMessage('Failed to save. Check console.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Card>
+      <h2 className="font-semibold text-neutral-700 mb-3">My Team</h2>
+      <p className="text-sm text-neutral-500 mb-4">
+        Assign yourself to a fantasy team so your "Your Card" appears on the
+        Scoreboard.
+      </p>
+      <div className="space-y-3">
+        <Select
+          label="Tournament"
+          value={selectedTournamentId}
+          onChange={e => {
+            setSelectedTournamentId(e.target.value);
+            setSelectedTeamId('');
+            setMessage('');
+          }}
+        >
+          <option value="">Choose tournament…</option>
+          {tournaments.map(t => (
+            <option key={t.id} value={t.id}>
+              {t.name} {t.year}
+            </option>
+          ))}
+        </Select>
+
+        <Select
+          label="Team"
+          value={selectedTeamId}
+          onChange={e => { setSelectedTeamId(e.target.value); setMessage(''); }}
+          disabled={!selectedTournamentId || teams.length === 0}
+        >
+          <option value="">
+            {!selectedTournamentId
+              ? 'Select a tournament first…'
+              : teams.length === 0
+              ? 'No teams found…'
+              : 'Choose team…'}
+          </option>
+          {teams.map(t => (
+            <option key={t.id} value={t.id}>
+              {t.name}
+            </option>
+          ))}
+        </Select>
+
+        {message && (
+          <p
+            className={`text-sm ${
+              message === 'Team saved!'
+                ? 'text-green-600 font-medium'
+                : 'text-red-600'
+            }`}
+          >
+            {message}
+          </p>
+        )}
+
+        <div className="flex justify-end pt-1">
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? 'Saving…' : 'Save Team'}
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 export function Settings() {
-  const { isAdmin, loading: authLoading, user } = useAuth();
+  const { isAdmin, loading: authLoading, user, userProfile } = useAuth();
   const [selectedTournamentId, setSelectedTournamentId] = useState('');
   const [working, setWorking] = useState(false);
   const [message, setMessage] = useState('');
@@ -305,6 +423,13 @@ export function Settings() {
         {selectedTournamentId && (
           <EditTeamsCard tournamentId={selectedTournamentId} />
         )}
+
+        <AdminTeamCard
+          adminUid={user!.uid}
+          adminEmail={user!.email ?? ''}
+          currentTeamId={userProfile?.teamId}
+          currentTournamentId={userProfile?.tournamentId}
+        />
 
         <Card>
           <h2 className="font-semibold text-neutral-700 mb-3">Account</h2>
