@@ -199,16 +199,26 @@ export async function fetchLeaderboard(): Promise<PlayerScore[]> {
                         totRaw, roundsPlayed }): PlayerScore => {
     let totalScore: number;
 
+    // Minimum plausible strokes for a completed 18-hole round (~55).
+    // A WD player who left mid-round may have a partial stroke count
+    // (e.g. 46 through 13 holes) that would produce a wildly wrong
+    // to-par if treated as a full round.
+    const minStrokesPerRound = 55;
+
     if (scoreRaw !== null) {
-      // Normal case: SCORE column has a valid to-par value
       totalScore = scoreRaw;
-    } else if (totRaw !== null && totRaw > 25 && roundsPlayed > 0) {
-      // MC/WD case: derive to-par from stroke total and inferred par
+    } else if (
+      totRaw !== null && totRaw > 25 && roundsPlayed > 0 &&
+      totRaw >= roundsPlayed * minStrokesPerRound
+    ) {
       totalScore = totRaw - (coursePar * roundsPlayed);
     } else if (roundsPlayed > 0) {
-      // Last resort: TOT unavailable — sum stroke counts and subtract par
       const strokeSum = (r1 ?? 0) + (r2 ?? 0) + (r3 ?? 0) + (r4 ?? 0);
-      totalScore = strokeSum - (coursePar * roundsPlayed);
+      if (strokeSum >= roundsPlayed * minStrokesPerRound) {
+        totalScore = strokeSum - (coursePar * roundsPlayed);
+      } else {
+        totalScore = 0;
+      }
     } else {
       totalScore = 0;
     }
