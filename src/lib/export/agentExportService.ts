@@ -142,7 +142,7 @@ export async function generateAndUploadAgentExport(
   tournamentId: string,
   players: PlayerScore[],
   fantasyStandings: TeamResult[],
-): Promise<{ documentPath: string }> {
+): Promise<{ payloadJson: string; documentPath: string }> {
   const [tournament, priorMeta] = await Promise.all([
     getTournament(tournamentId),
     getPriorExportMeta(tournamentId),
@@ -205,5 +205,5 @@ export async function generateAndUploadAgentExport(
   };
   await saveExportMeta(tournamentId, newMeta);
 
-  return { documentPath: `agentExports/${tournamentId}` };
+  return { payloadJson, documentPath: `agentExports/${tournamentId}` };
 }

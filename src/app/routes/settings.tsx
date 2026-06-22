@@ -301,9 +301,10 @@ export function Settings() {
   const [working, setWorking] = useState(false);
   const [message, setMessage] = useState('');
   const [exportState, setExportState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [exportPath, setExportPath] = useState<string | null>(null);
+  const [exportJson, setExportJson] = useState<string | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
   const [exportedAt, setExportedAt] = useState<string | null>(null);
+  const [copyLabel, setCopyLabel] = useState('Copy JSON');
   const queryClient = useQueryClient();
 
   const { data: tournaments = [], isLoading } = useQuery({
@@ -422,7 +423,8 @@ export function Settings() {
 
                   <div className="pt-3 mt-3 border-t border-neutral-200">
                     <p className="text-xs text-neutral-500 mb-2">
-                      Export tournament data as a structured JSON snapshot to Firestore for AI-generated summaries.
+                      Export tournament data as structured JSON for AI-generated summaries.
+                      Copy the JSON and paste it into Claude or download the file.
                     </p>
                     <Button
                       size="sm"
@@ -430,14 +432,15 @@ export function Settings() {
                       onClick={async () => {
                         setExportState('loading');
                         setExportError(null);
-                        setExportPath(null);
+                        setExportJson(null);
+                        setCopyLabel('Copy JSON');
                         try {
-                          const { documentPath } = await generateAndUploadAgentExport(
+                          const { payloadJson } = await generateAndUploadAgentExport(
                             selectedTournamentId,
                             players,
                             fantasyStandings,
                           );
-                          setExportPath(documentPath);
+                          setExportJson(payloadJson);
                           setExportedAt(new Date().toLocaleString());
                           setExportState('success');
                         } catch (err) {
@@ -450,24 +453,37 @@ export function Settings() {
                       {exportState === 'loading' ? 'Exporting…' : 'Export for AI Summary'}
                     </Button>
 
-                    {exportState === 'success' && exportPath && (
-                      <div className="mt-2 space-y-1">
+                    {exportState === 'success' && exportJson && (
+                      <div className="mt-2 space-y-2">
                         <p className="text-sm text-green-600 font-medium">
                           Export complete {exportedAt && `at ${exportedAt}`}
                         </p>
                         <div className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            readOnly
-                            value={exportPath}
-                            className="flex-1 text-xs bg-neutral-50 border border-neutral-200 rounded px-2 py-1 text-neutral-600 font-mono"
-                          />
                           <Button
                             size="sm"
                             variant="secondary"
-                            onClick={() => navigator.clipboard.writeText(exportPath)}
+                            onClick={() => {
+                              navigator.clipboard.writeText(exportJson);
+                              setCopyLabel('Copied!');
+                              setTimeout(() => setCopyLabel('Copy JSON'), 2000);
+                            }}
                           >
-                            Copy URL
+                            {copyLabel}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              const blob = new Blob([exportJson], { type: 'application/json' });
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = url;
+                              a.download = `${selectedTournamentId}-export.json`;
+                              a.click();
+                              URL.revokeObjectURL(url);
+                            }}
+                          >
+                            Download JSON
                           </Button>
                         </div>
                       </div>
