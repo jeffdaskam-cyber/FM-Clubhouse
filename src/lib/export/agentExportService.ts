@@ -4,7 +4,6 @@ import { getTournament } from '@/lib/firebase/tournaments';
 import { getPriorExportMeta, saveExportMeta } from './exportMetaService';
 import { buildNotableMoments } from './notableMomentsBuilder';
 import { buildFantasyMovementSummary } from './movementSummaryBuilder';
-import type { Tournament } from '@/types/tournament';
 import type { PlayerScore } from '@/lib/scoring/types';
 import type { TeamResult } from '@/lib/scoring/fantasyEngine';
 import type {
@@ -72,7 +71,7 @@ function mapGolfer(p: PlayerScore): AgentExportGolfer {
     position: p.position || '-',
     positionNumeric: p.status === 'cut' || p.status === 'wd' ? null : parsePositionNumeric(p.position),
     roundScores: [p.r1, p.r2, p.r3, p.r4],
-    status: p.status === 'dq' ? 'wd' : p.status,
+    status: p.status,
   };
 }
 
@@ -90,7 +89,7 @@ function mapLeaderboardEntry(p: PlayerScore): AgentExportLeaderboardEntry {
     todayScoreDisplay: formatToPar(todayScore),
     thru: p.thru || '-',
     roundScores: [p.r1, p.r2, p.r3, p.r4],
-    status: p.status === 'dq' ? 'wd' : p.status,
+    status: p.status,
   };
 }
 
