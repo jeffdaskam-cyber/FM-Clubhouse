@@ -14,6 +14,7 @@ import { LockTournamentButton } from '@/components/admin/LockTournamentButton';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useFantasyLeague } from '@/features/fantasy/useFantasyLeague';
 import { buildFantasyStandings } from '@/lib/scoring/fantasyEngine';
+import { generateAndUploadAgentExport } from '@/lib/export/agentExportService';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
 import { saveUserProfile } from '@/lib/firebase/userProfiles';
@@ -299,6 +300,10 @@ export function Settings() {
   const [selectedTournamentId, setSelectedTournamentId] = useState('');
   const [working, setWorking] = useState(false);
   const [message, setMessage] = useState('');
+  const [exportState, setExportState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [exportUrl, setExportUrl] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [exportedAt, setExportedAt] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: tournaments = [], isLoading } = useQuery({
@@ -413,6 +418,65 @@ export function Settings() {
                         queryClient.invalidateQueries({ queryKey: ['tournaments'] })
                       }
                     />
+                  </div>
+
+                  <div className="pt-3 mt-3 border-t border-neutral-200">
+                    <p className="text-xs text-neutral-500 mb-2">
+                      Export tournament data as a structured JSON file for AI-generated summaries.
+                      The file is written to Firebase Storage and publicly accessible.
+                    </p>
+                    <Button
+                      size="sm"
+                      disabled={exportState === 'loading'}
+                      onClick={async () => {
+                        setExportState('loading');
+                        setExportError(null);
+                        setExportUrl(null);
+                        try {
+                          const { publicUrl } = await generateAndUploadAgentExport(
+                            selectedTournamentId,
+                            players,
+                            fantasyStandings,
+                          );
+                          setExportUrl(publicUrl);
+                          setExportedAt(new Date().toLocaleString());
+                          setExportState('success');
+                        } catch (err) {
+                          console.error('Export failed:', err);
+                          setExportError(err instanceof Error ? err.message : 'Export failed');
+                          setExportState('error');
+                        }
+                      }}
+                    >
+                      {exportState === 'loading' ? 'Exporting…' : 'Export for AI Summary'}
+                    </Button>
+
+                    {exportState === 'success' && exportUrl && (
+                      <div className="mt-2 space-y-1">
+                        <p className="text-sm text-green-600 font-medium">
+                          Export complete {exportedAt && `at ${exportedAt}`}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            readOnly
+                            value={exportUrl}
+                            className="flex-1 text-xs bg-neutral-50 border border-neutral-200 rounded px-2 py-1 text-neutral-600 font-mono"
+                          />
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => navigator.clipboard.writeText(exportUrl)}
+                          >
+                            Copy URL
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {exportState === 'error' && exportError && (
+                      <p className="mt-2 text-sm text-red-600">{exportError}</p>
+                    )}
                   </div>
                 </div>
               )}
