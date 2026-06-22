@@ -301,7 +301,7 @@ export function Settings() {
   const [working, setWorking] = useState(false);
   const [message, setMessage] = useState('');
   const [exportState, setExportState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [exportUrl, setExportUrl] = useState<string | null>(null);
+  const [exportPath, setExportPath] = useState<string | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
   const [exportedAt, setExportedAt] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -422,8 +422,7 @@ export function Settings() {
 
                   <div className="pt-3 mt-3 border-t border-neutral-200">
                     <p className="text-xs text-neutral-500 mb-2">
-                      Export tournament data as a structured JSON file for AI-generated summaries.
-                      The file is written to Firebase Storage and publicly accessible.
+                      Export tournament data as a structured JSON snapshot to Firestore for AI-generated summaries.
                     </p>
                     <Button
                       size="sm"
@@ -431,14 +430,14 @@ export function Settings() {
                       onClick={async () => {
                         setExportState('loading');
                         setExportError(null);
-                        setExportUrl(null);
+                        setExportPath(null);
                         try {
-                          const { publicUrl } = await generateAndUploadAgentExport(
+                          const { documentPath } = await generateAndUploadAgentExport(
                             selectedTournamentId,
                             players,
                             fantasyStandings,
                           );
-                          setExportUrl(publicUrl);
+                          setExportPath(documentPath);
                           setExportedAt(new Date().toLocaleString());
                           setExportState('success');
                         } catch (err) {
@@ -451,7 +450,7 @@ export function Settings() {
                       {exportState === 'loading' ? 'Exporting…' : 'Export for AI Summary'}
                     </Button>
 
-                    {exportState === 'success' && exportUrl && (
+                    {exportState === 'success' && exportPath && (
                       <div className="mt-2 space-y-1">
                         <p className="text-sm text-green-600 font-medium">
                           Export complete {exportedAt && `at ${exportedAt}`}
@@ -460,13 +459,13 @@ export function Settings() {
                           <input
                             type="text"
                             readOnly
-                            value={exportUrl}
+                            value={exportPath}
                             className="flex-1 text-xs bg-neutral-50 border border-neutral-200 rounded px-2 py-1 text-neutral-600 font-mono"
                           />
                           <Button
                             size="sm"
                             variant="secondary"
-                            onClick={() => navigator.clipboard.writeText(exportUrl)}
+                            onClick={() => navigator.clipboard.writeText(exportPath)}
                           >
                             Copy URL
                           </Button>

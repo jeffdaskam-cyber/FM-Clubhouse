@@ -1,4 +1,3 @@
-import { getStorage, ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { formatToPar, windDirectionLabel, weatherCodeToDescription } from '@/utils/scoring';
@@ -143,7 +142,7 @@ export async function generateAndUploadAgentExport(
   tournamentId: string,
   players: PlayerScore[],
   fantasyStandings: TeamResult[],
-): Promise<{ publicUrl: string }> {
+): Promise<{ documentPath: string }> {
   const [tournament, priorMeta] = await Promise.all([
     getTournament(tournamentId),
     getPriorExportMeta(tournamentId),
@@ -190,23 +189,11 @@ export async function generateAndUploadAgentExport(
   };
 
   const payloadJson = JSON.stringify(payload, null, 2);
-  let publicUrl: string;
 
-  try {
-    const storage = getStorage();
-    const exportRef = ref(storage, `agent-exports/${tournamentId}/latest.json`);
-    await uploadString(exportRef, payloadJson, 'raw', {
-      contentType: 'application/json',
-    });
-    publicUrl = await getDownloadURL(exportRef);
-  } catch (storageErr) {
-    console.warn('Storage upload failed, falling back to Firestore:', storageErr);
-    await setDoc(doc(db, 'agentExports', tournamentId), {
-      payload: payloadJson,
-      exportedAt: payload.exportedAt,
-    });
-    publicUrl = `firestore://agentExports/${tournamentId}`;
-  }
+  await setDoc(doc(db, 'agentExports', tournamentId), {
+    payload: payloadJson,
+    exportedAt: payload.exportedAt,
+  });
 
   const newMeta: ExportMeta = {
     lastExportAt: payload.exportedAt,
@@ -218,5 +205,5 @@ export async function generateAndUploadAgentExport(
   };
   await saveExportMeta(tournamentId, newMeta);
 
-  return { publicUrl };
+  return { documentPath: `agentExports/${tournamentId}` };
 }
