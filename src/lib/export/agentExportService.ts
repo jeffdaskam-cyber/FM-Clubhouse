@@ -1,4 +1,6 @@
 import { getStorage, ref, uploadString, getDownloadURL } from 'firebase/storage';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
 import { formatToPar, windDirectionLabel, weatherCodeToDescription } from '@/utils/scoring';
 import { getTournament } from '@/lib/firebase/tournaments';
 import { getPriorExportMeta, saveExportMeta } from './exportMetaService';
@@ -187,13 +189,24 @@ export async function generateAndUploadAgentExport(
     fantasyMovementSummary,
   };
 
-  const storage = getStorage();
-  const exportRef = ref(storage, `agent-exports/${tournamentId}/latest.json`);
-  await uploadString(exportRef, JSON.stringify(payload, null, 2), 'raw', {
-    contentType: 'application/json',
-  });
+  const payloadJson = JSON.stringify(payload, null, 2);
+  let publicUrl: string;
 
-  const publicUrl = await getDownloadURL(exportRef);
+  try {
+    const storage = getStorage();
+    const exportRef = ref(storage, `agent-exports/${tournamentId}/latest.json`);
+    await uploadString(exportRef, payloadJson, 'raw', {
+      contentType: 'application/json',
+    });
+    publicUrl = await getDownloadURL(exportRef);
+  } catch (storageErr) {
+    console.warn('Storage upload failed, falling back to Firestore:', storageErr);
+    await setDoc(doc(db, 'agentExports', tournamentId), {
+      payload: payloadJson,
+      exportedAt: payload.exportedAt,
+    });
+    publicUrl = `firestore://agentExports/${tournamentId}`;
+  }
 
   const newMeta: ExportMeta = {
     lastExportAt: payload.exportedAt,
